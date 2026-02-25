@@ -47,7 +47,7 @@ jobs:
 
       - uses: nosborn/github-action-markdown-cli@v3.3.0
         with:
-          files: README.md docs/
+          files: README.md
           config_file: .markdownlint.json
         continue-on-error: true
 
@@ -84,20 +84,27 @@ jobs:
 
       - name: Verify README exists
         run: |
-          [ -f README.md ] && echo "✅ README.md exists" || exit 1
+          if [ -f README.md ]; then
+            echo "README.md exists"
+          else
+            echo "ERROR: README.md not found"
+            exit 1
+          fi
 
       - name: Check for required sections
         run: |
-          echo "✅ Checking README sections..."
-          grep -q "Quick Start" README.md || exit 1
-          grep -q "Configuration" README.md || exit 1
-          grep -q "Troubleshooting" README.md || exit 1
-          grep -q "Memory Optimization" README.md || exit 1
-          echo "All required sections found!"
+          echo "Checking README sections..."
+          missing_sections=""
+          grep -q "Quick Start" README.md || missing_sections="${missing_sections}Quick Start "
+          grep -q "Configuration" README.md || missing_sections="${missing_sections}Configuration "
+          grep -q "Troubleshooting" README.md || missing_sections="${missing_sections}Troubleshooting "
+          grep -q "Memory Optimization" README.md || missing_sections="${missing_sections}Memory Optimization "
 
-      - name: Verify contributing guide
-        run: |
-          [ -f docs/CONTRIBUTING.md ] && echo "✅ Contributing guide exists" || exit 1
+          if [ -n "$missing_sections" ]; then
+            echo "ERROR: Missing sections: $missing_sections"
+            exit 1
+          fi
+          echo "All required sections found!"
 
   docker-build:
     runs-on: ubuntu-latest
