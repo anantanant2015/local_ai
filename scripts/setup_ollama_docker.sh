@@ -10,6 +10,34 @@ echo -e "${CYAN}🚀 Interactive Ollama Setup${NC}\n"
 # Check if Docker is running
 check_docker
 
+# Configure Docker daemon for optimal memory usage
+echo -e "${BLUE}🔧 Configuring Docker daemon for optimal memory...${NC}"
+DAEMON_JSON="/etc/docker/daemon.json"
+if [ ! -f "$DAEMON_JSON" ]; then
+  sudo bash -c 'echo "{}" > '"$DAEMON_JSON"
+fi
+
+# Check if memory is already configured
+if ! sudo grep -q '"memory"' "$DAEMON_JSON"; then
+  echo -e "${YELLOW}Setting up Docker daemon memory configuration...${NC}"
+  sudo tee "$DAEMON_JSON" > /dev/null <<EOF
+{
+  "memory": 4294967296,
+  "memswap": 10737418240,
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "10m",
+    "max-file": "3"
+  }
+}
+EOF
+  echo -e "${GREEN}✅ Docker daemon configured: 4GB memory + 6GB swap${NC}"
+  echo -e "${YELLOW}⚠️  Note: Restart Docker for changes to take effect${NC}"
+  echo -e "${BLUE}   Run: sudo systemctl restart docker${NC}\n"
+else
+  echo -e "${GREEN}✅ Docker daemon already configured${NC}\n"
+fi
+
 # Pull Ollama image
 echo -e "${BLUE}📥 Pulling Ollama image...${NC}"
 docker pull ollama/ollama:latest
@@ -23,22 +51,18 @@ if docker ps -a | grep -q ollama-server; then
   echo -e "${YELLOW}⚠️  Ollama container already exists${NC}"
   read -p "Remove and recreate? (y/N): " confirm
   if [[ "$confirm" =~ ^[Yy]$ ]]; then
-    docker rm -f ollama-server 2>/dev/null || true
+    docker compose down 2>/dev/null || docker rm -f ollama-server 2>/dev/null || true
   else
     echo -e "${BLUE}Starting existing container...${NC}"
-    docker start ollama-server 2>/dev/null || true
+    docker compose up -d 2>/dev/null || docker start ollama-server 2>/dev/null || true
     sleep 5
   fi
 fi
 
-# Start container if not running
+# Start container using docker compose if not running
 if ! docker ps | grep -q ollama-server; then
-  echo -e "${BLUE}🔄 Starting Ollama container...${NC}"
-  docker run -d \
-    --name ollama-server \
-    -v ollama-models:/root/.ollama \
-    -p 11434:11434 \
-    ollama/ollama:latest
+  echo -e "${BLUE}🔄 Starting Ollama container with docker compose...${NC}"
+  docker compose up -d
   
   echo -e "${BLUE}⏳ Waiting for Ollama to start...${NC}"
   sleep 10
