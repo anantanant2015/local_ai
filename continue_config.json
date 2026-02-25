@@ -3,14 +3,20 @@
     {
       "title": "Mistral Local",
       "provider": "ollama",
-      "model": "mistral",
+      "model": "mistral:latest",
+      "apiBase": "http://localhost:11434"
+    },
+    {
+      "title": "Phi-2 Local",
+      "provider": "ollama",
+      "model": "phi:latest",
       "apiBase": "http://localhost:11434"
     }
   ],
   "tabAutocompleteModel": {
-    "title": "Mistral Local",
+    "title": "Phi-2 Local",
     "provider": "ollama",
-    "model": "mistral",
+    "model": "phi:latest",
     "apiBase": "http://localhost:11434"
   },
   "slashCommands": [
