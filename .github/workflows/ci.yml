@@ -10,15 +10,15 @@ jobs:
   lint-and-validate:
     runs-on: ubuntu-latest
     name: Lint and Validate
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Check Docker files
         run: |
           echo "✅ Validating docker-compose.yml..."
-          docker-compose config -q
-          
+          docker compose config -q
+
       - name: Validate shell scripts
         run: |
           echo "✅ Checking shell scripts..."
@@ -26,13 +26,13 @@ jobs:
             echo "Checking $script..."
             bash -n "$script"
           done
-      
+
       - name: Validate JSON files
         run: |
           echo "✅ Validating JSON files..."
           python3 -m json.tool scripts/models.json > /dev/null
           python3 -m json.tool continue_config.json > /dev/null
-      
+
       - name: Check Makefile syntax
         run: |
           echo "✅ Validating Makefile..."
@@ -41,10 +41,10 @@ jobs:
   markdown-lint:
     runs-on: ubuntu-latest
     name: Markdown Linting
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: nosborn/github-action-markdown-cli@v3.3.0
         with:
           files: README.md docs/
@@ -57,15 +57,15 @@ jobs:
     services:
       docker:
         image: docker:dind
-        
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Run docker-compose validation
         run: |
           echo "✅ Testing docker-compose configuration..."
-          docker-compose -f docker-compose.yml config
-      
+          docker compose -f docker-compose.yml config
+
       - name: Test script syntax
         run: |
           bash -n scripts/setup_ollama_docker.sh
@@ -78,14 +78,14 @@ jobs:
   documentation:
     runs-on: ubuntu-latest
     name: Check Documentation
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Verify README exists
         run: |
           [ -f README.md ] && echo "✅ README.md exists" || exit 1
-      
+
       - name: Check for required sections
         run: |
           echo "✅ Checking README sections..."
@@ -94,7 +94,7 @@ jobs:
           grep -q "Troubleshooting" README.md || exit 1
           grep -q "Memory Optimization" README.md || exit 1
           echo "All required sections found!"
-      
+
       - name: Verify contributing guide
         run: |
           [ -f docs/CONTRIBUTING.md ] && echo "✅ Contributing guide exists" || exit 1
@@ -102,13 +102,13 @@ jobs:
   docker-build:
     runs-on: ubuntu-latest
     name: Docker Compose Build
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      
+
       - name: Validate docker-compose pull
         run: |
           echo "✅ Docker image validation..."
@@ -117,10 +117,10 @@ jobs:
   security-scan:
     runs-on: ubuntu-latest
     name: Security Scan
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Check for secrets (shellcheck)
         run: |
           echo "✅ Scanning for potential security issues..."
@@ -129,7 +129,7 @@ jobs:
             # Check for hardcoded credentials (basic check)
             grep -n "password\|secret\|token\|key=" "$script" || true
           done
-      
+
       - name: Verify no API keys in config
         run: |
           echo "✅ Checking configs for exposed secrets..."
@@ -142,10 +142,10 @@ jobs:
     name: Build Summary
     needs: [lint-and-validate, test-setup, documentation, docker-build]
     if: always()
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Print Summary
         run: |
           echo "================================"
