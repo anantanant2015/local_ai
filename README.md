@@ -95,7 +95,7 @@ The extension will connect to `http://localhost:11434` automatically.
 ### Basic Operations
 
 | Command | Purpose |
-|---------|---------|  
+|---------|---------|
 | `make setup` | Interactive setup: choose models and configure Continue |
 | `make start` | Start container and verify connectivity |
 | `make stop` | Stop the container |
@@ -106,7 +106,7 @@ The extension will connect to `http://localhost:11434` automatically.
 ### Model Management
 
 | Command | Purpose |
-|---------|---------|  
+|---------|---------|
 | `make list-models` | View available models and installation status |
 | `make add-model` | Download additional models interactively |
 | `make switch` | Switch active chat and autocomplete models |

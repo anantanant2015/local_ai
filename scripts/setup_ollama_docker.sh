@@ -63,7 +63,7 @@ fi
 if ! docker ps | grep -q ollama-server; then
   echo -e "${BLUE}🔄 Starting Ollama container with docker compose...${NC}"
   docker compose up -d
-  
+
   echo -e "${BLUE}⏳ Waiting for Ollama to start...${NC}"
   sleep 10
 fi
@@ -96,7 +96,7 @@ declare -a SELECTED_MODELS
 for choice in $choices; do
   if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -le "$MODEL_COUNT" ]; then
     MODEL_KEY="${MODEL_MAP[$choice]}"
-    
+
     if command -v jq &> /dev/null; then
       OLLAMA_TAG=$(jq -r ".[\"$MODEL_KEY\"].ollamaTag" "$MODELS_JSON")
       DISPLAY_NAME=$(jq -r ".[\"$MODEL_KEY\"].displayName" "$MODELS_JSON")
@@ -104,7 +104,7 @@ for choice in $choices; do
       OLLAMA_TAG=$(cat "$MODELS_JSON" | awk "/\"$MODEL_KEY\":/,/^\s*\}/" | grep ollamaTag | cut -d'"' -f4)
       DISPLAY_NAME=$(cat "$MODELS_JSON" | awk "/\"$MODEL_KEY\":/,/^\s*\}/" | grep displayName | cut -d'"' -f4)
     fi
-    
+
     SELECTED_MODELS+=("$OLLAMA_TAG:$DISPLAY_NAME")
   fi
 done
@@ -136,7 +136,7 @@ SMALLEST_SIZE=999999
 
 for model_info in "${SELECTED_MODELS[@]}"; do
   IFS=':' read -r tag name <<< "$model_info"
-  
+
   # Find model key and get size
   if command -v jq &> /dev/null; then
     MODEL_KEY=$(jq -r "to_entries[] | select(.value.ollamaTag == \"$tag\") | .key" "$MODELS_JSON")
@@ -145,20 +145,20 @@ for model_info in "${SELECTED_MODELS[@]}"; do
     MODEL_KEY=$(cat "$MODELS_JSON" | grep -B 8 "\"ollamaTag\": \"$tag\"" | grep -o '"[^"]*": *{' | head -1 | tr -d '": {')
     SIZE_GB=$(cat "$MODELS_JSON" | awk "/\"$MODEL_KEY\":/,/^\s*\}/" | grep '"size"' | grep -o '[0-9.]*' | head -1)
   fi
-  
+
   SIZE_INT=$(echo "$SIZE_GB * 1000" | bc 2>/dev/null || echo "1000" | cut -d. -f1)
-  
+
   if [ "$SIZE_INT" -lt "$SMALLEST_SIZE" ]; then
     SMALLEST_SIZE=$SIZE_INT
     AUTOCOMPLETE_MODEL=$tag
   fi
-  
+
   if [ "$FIRST" = true ]; then
     FIRST=false
   else
     MODELS_ARRAY+=","
   fi
-  
+
   MODELS_ARRAY+="
     {
       \"title\": \"$name\",
