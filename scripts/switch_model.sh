@@ -29,11 +29,20 @@ FIRST=true
 
 while IFS= read -r installed_tag; do
   # Find model key from tag
-  MODEL_KEY=$(cat "$MODELS_JSON" | grep -B 8 "\"ollamaTag\": \"$installed_tag\"" | grep -E '^\s*"[^"]+":' | head -1 | sed 's/.*"\([^"]*\)".*/\1/')
+  if command -v jq &> /dev/null; then
+    MODEL_KEY=$(jq -r "to_entries[] | select(.value.ollamaTag == \"$installed_tag\") | .key" "$MODELS_JSON")
+    if [ -n "$MODEL_KEY" ]; then
+      DISPLAY_NAME=$(jq -r ".[\"$MODEL_KEY\"].displayName" "$MODELS_JSON")
+    fi
+  else
+    # Fallback: search for the tag and extract model key
+    MODEL_KEY=$(cat "$MODELS_JSON" | grep -B 8 "\"ollamaTag\": \"$installed_tag\"" | grep -o '"[^"]*": *{' | head -1 | tr -d '": {')
+    if [ -n "$MODEL_KEY" ]; then
+      DISPLAY_NAME=$(cat "$MODELS_JSON" | awk "/\"$MODEL_KEY\":/,/^\s*\}/" | grep displayName | cut -d'"' -f4)
+    fi
+  fi
   
   if [ -n "$MODEL_KEY" ]; then
-    DISPLAY_NAME=$(cat "$MODELS_JSON" | grep -A 2 "\"$MODEL_KEY\"" | grep "displayName" | sed 's/.*: "\(.*\)".*/\1/' | sed 's/,$//')
-    
     if [ "$FIRST" = true ]; then
       FIRST=false
     else

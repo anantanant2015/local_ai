@@ -142,13 +142,28 @@ show_model_menu() {
   local i=1
   declare -g -A MODEL_MAP
   
-  while IFS= read -r model_key; do
-    local display_name=$(cat "$MODELS_JSON" | grep -A 2 "\"$model_key\"" | grep "displayName" | sed 's/.*: "\(.*\)".*/\1/' | sed 's/,$//')
-    local size=$(cat "$MODELS_JSON" | grep -A 3 "\"$model_key\"" | grep "size" | sed 's/.*: "\(.*\)".*/\1/' | sed 's/,$//')
-    local memory=$(cat "$MODELS_JSON" | grep -A 4 "\"$model_key\"" | grep "memoryRequired" | sed 's/.*: "\(.*\)".*/\1/' | sed 's/,$//')
-    local quality=$(cat "$MODELS_JSON" | grep -A 6 "\"$model_key\"" | grep "quality" | sed 's/.*: "\(.*\)".*/\1/' | sed 's/,$//')
-    local description=$(cat "$MODELS_JSON" | grep -A 7 "\"$model_key\"" | grep "description" | sed 's/.*: "\(.*\)".*/\1/' | sed 's/,$//')
-    local ollama_tag=$(cat "$MODELS_JSON" | grep -A 8 "\"$model_key\"" | grep "ollamaTag" | sed 's/.*: "\(.*\)".*/\1/' | sed 's/,$//')
+  # Parse JSON properly using grep to extract each model block
+  local model_keys=($(cat "$MODELS_JSON" | grep -o '"[^"]*": *{' | grep -o '"[^"]*"' | tr -d '"'))
+  
+  for model_key in "${model_keys[@]}"; do
+    # Extract model info using jq if available, otherwise use grep
+    if command -v jq &> /dev/null; then
+      local display_name=$(jq -r ".[\"$model_key\"].displayName" "$MODELS_JSON")
+      local size=$(jq -r ".[\"$model_key\"].size" "$MODELS_JSON")
+      local memory=$(jq -r ".[\"$model_key\"].memoryRequired" "$MODELS_JSON")
+      local quality=$(jq -r ".[\"$model_key\"].quality" "$MODELS_JSON")
+      local description=$(jq -r ".[\"$model_key\"].description" "$MODELS_JSON")
+      local ollama_tag=$(jq -r ".[\"$model_key\"].ollamaTag" "$MODELS_JSON")
+    else
+      # Fallback to grep/awk for systems without jq
+      local model_block=$(cat "$MODELS_JSON" | awk "/\"$model_key\":/,/^\s*\}/" | head -20)
+      local display_name=$(echo "$model_block" | grep displayName | cut -d'"' -f4)
+      local size=$(echo "$model_block" | grep '"size"' | cut -d'"' -f4)
+      local memory=$(echo "$model_block" | grep memoryRequired | cut -d'"' -f4)
+      local quality=$(echo "$model_block" | grep '"quality"' | cut -d'"' -f4)
+      local description=$(echo "$model_block" | grep description | cut -d'"' -f4)
+      local ollama_tag=$(echo "$model_block" | grep ollamaTag | cut -d'"' -f4)
+    fi
     
     local installed_marker=""
     if echo "$installed_models" | grep -q "^${ollama_tag}$"; then
@@ -162,7 +177,7 @@ show_model_menu() {
     
     MODEL_MAP[$i]="$model_key"
     ((i++))
-  done < <(cat "$MODELS_JSON" | grep -E '^\s*"[^"]+":' | sed 's/.*"\([^"]*\)".*/\1/')
+  done
   
   export MODEL_COUNT=$((i-1))
 }

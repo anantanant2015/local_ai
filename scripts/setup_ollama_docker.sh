@@ -72,8 +72,15 @@ declare -a SELECTED_MODELS
 for choice in $choices; do
   if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -le "$MODEL_COUNT" ]; then
     MODEL_KEY="${MODEL_MAP[$choice]}"
-    OLLAMA_TAG=$(cat "$MODELS_JSON" | grep -A 8 "\"$MODEL_KEY\"" | grep "ollamaTag" | sed 's/.*: "\(.*\)".*/\1/' | sed 's/,$//')
-    DISPLAY_NAME=$(cat "$MODELS_JSON" | grep -A 2 "\"$MODEL_KEY\"" | grep "displayName" | sed 's/.*: "\(.*\)".*/\1/' | sed 's/,$//')
+    
+    if command -v jq &> /dev/null; then
+      OLLAMA_TAG=$(jq -r ".[\"$MODEL_KEY\"].ollamaTag" "$MODELS_JSON")
+      DISPLAY_NAME=$(jq -r ".[\"$MODEL_KEY\"].displayName" "$MODELS_JSON")
+    else
+      OLLAMA_TAG=$(cat "$MODELS_JSON" | awk "/\"$MODEL_KEY\":/,/^\s*\}/" | grep ollamaTag | cut -d'"' -f4)
+      DISPLAY_NAME=$(cat "$MODELS_JSON" | awk "/\"$MODEL_KEY\":/,/^\s*\}/" | grep displayName | cut -d'"' -f4)
+    fi
+    
     SELECTED_MODELS+=("$OLLAMA_TAG:$DISPLAY_NAME")
   fi
 done
@@ -107,9 +114,15 @@ for model_info in "${SELECTED_MODELS[@]}"; do
   IFS=':' read -r tag name <<< "$model_info"
   
   # Find model key and get size
-  MODEL_KEY=$(cat "$MODELS_JSON" | grep -B 8 "\"ollamaTag\": \"$tag\"" | grep -E '^\s*"[^"]+":' | head -1 | sed 's/.*"\([^"]*\)".*/\1/')
-  SIZE_GB=$(cat "$MODELS_JSON" | grep -A 3 "\"$MODEL_KEY\"" | grep "size" | sed 's/.*: "\([0-9.]*\).*/\1/')
-  SIZE_INT=$(echo "$SIZE_GB * 1000" | bc | cut -d. -f1)
+  if command -v jq &> /dev/null; then
+    MODEL_KEY=$(jq -r "to_entries[] | select(.value.ollamaTag == \"$tag\") | .key" "$MODELS_JSON")
+    SIZE_GB=$(jq -r ".[\"$MODEL_KEY\"].size" "$MODELS_JSON" | grep -o '[0-9.]*' | head -1)
+  else
+    MODEL_KEY=$(cat "$MODELS_JSON" | grep -B 8 "\"ollamaTag\": \"$tag\"" | grep -o '"[^"]*": *{' | head -1 | tr -d '": {')
+    SIZE_GB=$(cat "$MODELS_JSON" | awk "/\"$MODEL_KEY\":/,/^\s*\}/" | grep '"size"' | grep -o '[0-9.]*' | head -1)
+  fi
+  
+  SIZE_INT=$(echo "$SIZE_GB * 1000" | bc 2>/dev/null || echo "1000" | cut -d. -f1)
   
   if [ "$SIZE_INT" -lt "$SMALLEST_SIZE" ]; then
     SMALLEST_SIZE=$SIZE_INT

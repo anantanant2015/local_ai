@@ -30,9 +30,16 @@ fi
 
 # Get selected model
 MODEL_KEY="${MODEL_MAP[$choice]}"
-DISPLAY_NAME=$(cat "$MODELS_JSON" | grep -A 2 "\"$MODEL_KEY\"" | grep "displayName" | sed 's/.*: "\(.*\)".*/\1/' | sed 's/,$//')
-OLLAMA_TAG=$(cat "$MODELS_JSON" | grep -A 8 "\"$MODEL_KEY\"" | grep "ollamaTag" | sed 's/.*: "\(.*\)".*/\1/' | sed 's/,$//')
-MEMORY_REQ=$(cat "$MODELS_JSON" | grep -A 4 "\"$MODEL_KEY\"" | grep "memoryRequired" | sed 's/.*: "\(.*\)".*/\1/' | sed 's/,$//')
+
+if command -v jq &> /dev/null; then
+  DISPLAY_NAME=$(jq -r ".[\"$MODEL_KEY\"].displayName" "$MODELS_JSON")
+  OLLAMA_TAG=$(jq -r ".[\"$MODEL_KEY\"].ollamaTag" "$MODELS_JSON")
+  MEMORY_REQ=$(jq -r ".[\"$MODEL_KEY\"].memoryRequired" "$MODELS_JSON")
+else
+  DISPLAY_NAME=$(cat "$MODELS_JSON" | awk "/\"$MODEL_KEY\":/,/^\s*\}/" | grep displayName | cut -d'"' -f4)
+  OLLAMA_TAG=$(cat "$MODELS_JSON" | awk "/\"$MODEL_KEY\":/,/^\s*\}/" | grep ollamaTag | cut -d'"' -f4)
+  MEMORY_REQ=$(cat "$MODELS_JSON" | awk "/\"$MODEL_KEY\":/,/^\s*\}/" | grep memoryRequired | cut -d'"' -f4)
+fi
 
 # Check if already installed
 if is_model_installed "$OLLAMA_TAG"; then
