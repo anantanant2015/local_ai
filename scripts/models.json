@@ -1,0 +1,62 @@
+{
+  "phi": {
+    "displayName": "Phi-2",
+    "size": "1.6 GB",
+    "memoryRequired": "2.5 GB",
+    "speed": "fast",
+    "quality": "good",
+    "description": "Small, efficient model good for autocomplete and simple tasks",
+    "ollamaTag": "phi:latest",
+    "recommended": "autocomplete"
+  },
+  "mistral": {
+    "displayName": "Mistral 7B",
+    "size": "4.4 GB",
+    "memoryRequired": "5.0 GB",
+    "speed": "medium",
+    "quality": "excellent",
+    "description": "Powerful general-purpose model for complex reasoning and code generation",
+    "ollamaTag": "mistral:latest",
+    "recommended": "chat"
+  },
+  "codellama": {
+    "displayName": "Code Llama 7B",
+    "size": "3.8 GB",
+    "memoryRequired": "4.5 GB",
+    "speed": "medium",
+    "quality": "excellent-code",
+    "description": "Specialized for code completion and generation tasks",
+    "ollamaTag": "codellama:latest",
+    "recommended": "chat"
+  },
+  "llama2": {
+    "displayName": "Llama 2 7B",
+    "size": "3.8 GB",
+    "memoryRequired": "4.5 GB",
+    "speed": "medium",
+    "quality": "very-good",
+    "description": "General-purpose conversational model",
+    "ollamaTag": "llama2:latest",
+    "recommended": "chat"
+  },
+  "neural-chat": {
+    "displayName": "Neural Chat 7B",
+    "size": "4.1 GB",
+    "memoryRequired": "4.8 GB",
+    "speed": "medium",
+    "quality": "very-good",
+    "description": "Conversational model optimized for dialogue",
+    "ollamaTag": "neural-chat:latest",
+    "recommended": "chat"
+  },
+  "orca-mini": {
+    "displayName": "Orca Mini 3B",
+    "size": "1.9 GB",
+    "memoryRequired": "3.0 GB",
+    "speed": "fast",
+    "quality": "good",
+    "description": "Lightweight model for resource-constrained environments",
+    "ollamaTag": "orca-mini:latest",
+    "recommended": "autocomplete"
+  }
+}
