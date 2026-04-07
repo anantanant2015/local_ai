@@ -9,6 +9,16 @@
     "ollamaTag": "phi:latest",
     "recommended": "autocomplete"
   },
+  "tinyllama": {
+    "displayName": "TinyLlama 1.1B",
+    "size": "637 MB",
+    "memoryRequired": "1.5 GB",
+    "speed": "very-fast",
+    "quality": "basic",
+    "description": "Ultra-lightweight model for low-memory systems and quick local tests",
+    "ollamaTag": "tinyllama:latest",
+    "recommended": "autocomplete"
+  },
   "mistral": {
     "displayName": "Mistral 7B",
     "size": "4.4 GB",

@@ -86,10 +86,10 @@ echo -e "${CYAN}═════════════════════�
 show_model_menu
 
 echo -e "${CYAN}═══════════════════════════════════════════════════════════${NC}\n"
-echo -e "${YELLOW}Recommendation: Start with Phi (fast, lightweight) for autocomplete${NC}"
-echo -e "${YELLOW}                Add Mistral later for better chat quality${NC}\n"
+echo -e "${YELLOW}Recommendation: Start with TinyLlama (fastest, lowest RAM) for autocomplete${NC}"
+echo -e "${YELLOW}                Add Mistral or Qwen later for stronger chat quality${NC}\n"
 
-read -p "Select models to install (e.g., '1 2' or '1' for Phi only): " choices
+read -p "Select models to install (e.g., '1 2' or '1' for TinyLlama only): " choices
 
 # Parse selections
 declare -a SELECTED_MODELS
@@ -110,8 +110,8 @@ for choice in $choices; do
 done
 
 if [ ${#SELECTED_MODELS[@]} -eq 0 ]; then
-  echo -e "${YELLOW}No models selected. Using default: Phi${NC}"
-  SELECTED_MODELS=("phi:latest|Phi-2")
+  echo -e "${YELLOW}No models selected. Using default: TinyLlama${NC}"
+  SELECTED_MODELS=("tinyllama:latest|TinyLlama 1.1B")
 fi
 
 # Download selected models
@@ -128,11 +128,17 @@ done
 # Configure Continue
 echo -e "\n${CYAN}🔧 Configuring Continue extension...${NC}"
 
-# Build models array
-MODELS_ARRAY="["
-FIRST=true
 AUTOCOMPLETE_MODEL=""
 SMALLEST_SIZE=999999
+MODELS_CSV=""
+
+for model_info in "${SELECTED_MODELS[@]}"; do
+  IFS='|' read -r tag _ <<< "$model_info"
+  if [ "$tag" = "tinyllama:latest" ]; then
+    AUTOCOMPLETE_MODEL="$tag"
+    break
+  fi
+done
 
 for model_info in "${SELECTED_MODELS[@]}"; do
   IFS='|' read -r tag name <<< "$model_info"
@@ -148,32 +154,17 @@ for model_info in "${SELECTED_MODELS[@]}"; do
 
   SIZE_INT=$(echo "$SIZE_GB * 1000" | bc 2>/dev/null || echo "1000" | cut -d. -f1)
 
-  if [ "$SIZE_INT" -lt "$SMALLEST_SIZE" ]; then
+  if [ -z "$AUTOCOMPLETE_MODEL" ] && [ "$SIZE_INT" -lt "$SMALLEST_SIZE" ]; then
     SMALLEST_SIZE=$SIZE_INT
     AUTOCOMPLETE_MODEL=$tag
   fi
 
-  if [ "$FIRST" = true ]; then
-    FIRST=false
-  else
-    MODELS_ARRAY+=","
-  fi
-
-  MODELS_ARRAY+="
-    {
-      \"title\": \"$name\",
-      \"provider\": \"ollama\",
-      \"model\": \"$tag\",
-      \"apiBase\": \"http://localhost:11434\"
-    }"
+  [ -z "$MODELS_CSV" ] && MODELS_CSV="$tag" || MODELS_CSV="$MODELS_CSV,$tag"
 done
-
-MODELS_ARRAY+="
-  ]"
 
 # Use first selected model as chat model
 IFS='|' read -r CHAT_MODEL _ <<< "${SELECTED_MODELS[0]}"
-update_continue_config "$CHAT_MODEL" "$AUTOCOMPLETE_MODEL" "$MODELS_ARRAY"
+bash "$SCRIPT_DIR/generate_continue_config.sh" --mode docker --models "$MODELS_CSV" --chat "$CHAT_MODEL" --autocomplete "$AUTOCOMPLETE_MODEL"
 
 echo -e "\n${GREEN}✅ Setup complete!${NC}"
 echo -e "\n${CYAN}Next steps:${NC}"

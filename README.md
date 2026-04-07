@@ -150,9 +150,12 @@ The extension will connect to `http://localhost:11434` automatically.
 | `make list-models` | View available models and installation status |
 | `make add-model` | Download additional models interactively |
 | `make switch` | Switch active chat and autocomplete models |
+| `make generate-continue-config` | Interactive Continue config generator (Docker models) |
 | `make list-models-native` | View available models and status for native Ollama |
 | `make add-model-native` | Download additional models using native Ollama |
 | `make switch-native` | Switch active chat and autocomplete models for native Ollama |
+| `make generate-continue-config-native` | Interactive Continue config generator (native models) |
+| `make unload-models-native` | Unload currently loaded native models from RAM immediately |
 
 The `local_ai_agent/` directory is **completely self-contained**:
 is repository is **completely self-contained**:
@@ -175,6 +178,7 @@ No server management needed—everything is local Docker.
 | Model | Size | Memory | Best For |
 |-------|------|--------|----------|
 | **Phi-2** | 1.6 GB | 2.5 GB | Autocomplete, fast responses |
+| **TinyLlama 1.1B** | 637 MB | 1.5 GB | Very low-memory testing and quick prompts |
 | **Mistral 7B** | 4.4 GB | 5.0 GB | Complex reasoning, code generation |
 | **CodeLlama 7B** | 3.8 GB | 4.5 GB | Code-specific tasks |
 | **Llama2 7B** | 3.8 GB | 4.5 GB | General conversation |
@@ -235,6 +239,33 @@ Models configured automatically:
 - **Chat model**: Mistral Local (or your choice)
 - **Autocomplete model**: Phi-2 Local (fast, lightweight)
 - **API endpoint**: http://localhost:11434
+
+### Native Memory Control (Ollama)
+
+If RAM stays high after running prompts, note that Ollama keeps recently used models loaded briefly for faster follow-up responses.
+
+Quick actions:
+
+```bash
+# See loaded models and their RAM footprint
+ollama ps
+
+# Force-unload loaded models (native mode)
+make unload-models-native
+```
+
+Keep-alive tuning (step 3):
+
+- **What it is**: keep-alive controls how long a model remains in RAM after a response.
+- **Lower keep-alive**: less RAM usage, but slower next response (cold reload).
+- **Higher keep-alive**: faster repeated prompts, but more RAM stays used.
+
+Manual one-off example (aggressive unload right after response):
+
+```bash
+curl -sS http://127.0.0.1:11434/api/generate \
+   -d '{"model":"phi3:mini","prompt":"hi","keep_alive":0}'
+```
 
 ## Configuration
 
