@@ -86,10 +86,10 @@ echo -e "${CYAN}═════════════════════�
 show_model_menu
 
 echo -e "${CYAN}═══════════════════════════════════════════════════════════${NC}\n"
-echo -e "${YELLOW}Recommendation: Start with Phi (fast, lightweight) for autocomplete${NC}"
-echo -e "${YELLOW}                Add Mistral later for better chat quality${NC}\n"
+echo -e "${YELLOW}Recommendation: Start with TinyLlama (fastest, lowest RAM) for autocomplete${NC}"
+echo -e "${YELLOW}                Add Mistral or Qwen later for stronger chat quality${NC}\n"
 
-read -p "Select models to install (e.g., '1 2' or '1' for Phi only): " choices
+read -p "Select models to install (e.g., '1 2' or '1' for TinyLlama only): " choices
 
 # Parse selections
 declare -a SELECTED_MODELS
@@ -110,8 +110,8 @@ for choice in $choices; do
 done
 
 if [ ${#SELECTED_MODELS[@]} -eq 0 ]; then
-  echo -e "${YELLOW}No models selected. Using default: Phi${NC}"
-  SELECTED_MODELS=("phi:latest|Phi-2")
+  echo -e "${YELLOW}No models selected. Using default: TinyLlama${NC}"
+  SELECTED_MODELS=("tinyllama:latest|TinyLlama 1.1B")
 fi
 
 # Download selected models
@@ -133,6 +133,14 @@ SMALLEST_SIZE=999999
 MODELS_CSV=""
 
 for model_info in "${SELECTED_MODELS[@]}"; do
+  IFS='|' read -r tag _ <<< "$model_info"
+  if [ "$tag" = "tinyllama:latest" ]; then
+    AUTOCOMPLETE_MODEL="$tag"
+    break
+  fi
+done
+
+for model_info in "${SELECTED_MODELS[@]}"; do
   IFS='|' read -r tag name <<< "$model_info"
 
   # Find model key and get size
@@ -146,7 +154,7 @@ for model_info in "${SELECTED_MODELS[@]}"; do
 
   SIZE_INT=$(echo "$SIZE_GB * 1000" | bc 2>/dev/null || echo "1000" | cut -d. -f1)
 
-  if [ "$SIZE_INT" -lt "$SMALLEST_SIZE" ]; then
+  if [ -z "$AUTOCOMPLETE_MODEL" ] && [ "$SIZE_INT" -lt "$SMALLEST_SIZE" ]; then
     SMALLEST_SIZE=$SIZE_INT
     AUTOCOMPLETE_MODEL=$tag
   fi

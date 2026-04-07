@@ -24,7 +24,8 @@ show_model_menu_native
 
 echo -e "${YELLOW}Recommendation for 16GB RAM:${NC}"
 echo -e "  - qwen2.5-coder:7b for chat/code generation"
-echo -e "  - qwen2.5-coder:3b or phi3:mini for autocomplete"
+echo -e "  - tinyllama:latest for autocomplete (fastest, lowest RAM)"
+echo -e "  - qwen2.5-coder:3b or phi3:mini for higher-quality autocomplete"
 echo ""
 
 read -p "Select models to install (e.g., '7 8' or '1'): " choices
@@ -47,8 +48,8 @@ for choice in $choices; do
 done
 
 if [ ${#SELECTED_MODELS[@]} -eq 0 ]; then
-  echo -e "${YELLOW}No models selected. Using default: qwen2.5-coder:3b${NC}"
-  SELECTED_MODELS=("qwen2.5-coder:3b|Qwen 2.5 Coder 3B")
+  echo -e "${YELLOW}No models selected. Using default: TinyLlama${NC}"
+  SELECTED_MODELS=("tinyllama:latest|TinyLlama 1.1B")
 fi
 
 echo -e "\n${CYAN}📥 Downloading selected models...${NC}"
@@ -72,11 +73,21 @@ done
 
 for model_info in "${SELECTED_MODELS[@]}"; do
   IFS='|' read -r tag _ <<< "$model_info"
+  if [ "$tag" = "tinyllama:latest" ]; then
+    AUTOCOMPLETE_MODEL="$tag"
+    break
+  fi
+done
+
+if [ -z "$AUTOCOMPLETE_MODEL" ]; then
+  for model_info in "${SELECTED_MODELS[@]}"; do
+    IFS='|' read -r tag _ <<< "$model_info"
   if [[ "$tag" == *"3b"* ]] || [[ "$tag" == *"mini"* ]] || [[ "$tag" == "phi:latest" ]]; then
     AUTOCOMPLETE_MODEL="$tag"
     break
   fi
 done
+fi
 
 if [ -z "$AUTOCOMPLETE_MODEL" ]; then
   AUTOCOMPLETE_MODEL="$CHAT_MODEL"
