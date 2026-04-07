@@ -1,4 +1,4 @@
-.PHONY: help setup start stop clean logs list-models add-model switch setup-native start-native stop-native enable-autostart-ubuntu disable-autostart-ubuntu list-models-native add-model-native switch-native
+.PHONY: help setup start stop clean logs list-models add-model switch setup-native start-native stop-native enable-autostart-ubuntu disable-autostart-ubuntu list-models-native add-model-native switch-native unload-models-native generate-continue-config-native generate-continue-config
 
 help:
 	@echo "📋 Local AI Agent - Available Commands"
@@ -21,6 +21,9 @@ help:
 	@echo "  make list-models-native - View available models/status for native Ollama"
 	@echo "  make add-model-native   - Download additional models for native Ollama"
 	@echo "  make switch-native      - Switch native chat/autocomplete models"
+	@echo "  make generate-continue-config-native - Interactive Continue config generator (native)"
+	@echo "  make generate-continue-config        - Interactive Continue config generator (docker)"
+	@echo "  make unload-models-native - Unload currently loaded native Ollama models from RAM"
 	@echo ""
 	@echo "🔧 Configuration:"
 	@echo "  - Docker daemon: /etc/docker/daemon.json (4GB memory + 6GB swap)"
@@ -76,5 +79,14 @@ add-model-native:
 
 switch-native:
 	@bash scripts/switch_model_native.sh
+
+unload-models-native:
+	@bash scripts/unload_models_native.sh
+
+generate-continue-config-native:
+	@bash scripts/generate_continue_config.sh --mode native
+
+generate-continue-config:
+	@bash scripts/generate_continue_config.sh --mode docker
 
 .DEFAULT_GOAL := help

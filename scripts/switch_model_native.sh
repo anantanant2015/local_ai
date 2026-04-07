@@ -20,39 +20,6 @@ echo -e "${GREEN}Installed Models:${NC}"
 echo "$INSTALLED" | nl
 echo ""
 
-MODELS_ARRAY="["
-FIRST=true
-
-while IFS= read -r installed_tag; do
-  [ -z "$installed_tag" ] && continue
-
-  if command -v jq > /dev/null 2>&1; then
-    MODEL_KEY=$(jq -r "to_entries[] | select(.value.ollamaTag == \"$installed_tag\") | .key" "$MODELS_JSON")
-    if [ -n "$MODEL_KEY" ] && [ "$MODEL_KEY" != "null" ]; then
-      DISPLAY_NAME=$(jq -r ".[\"$MODEL_KEY\"].displayName" "$MODELS_JSON")
-    else
-      DISPLAY_NAME="$installed_tag"
-    fi
-  else
-    MODEL_KEY=$(cat "$MODELS_JSON" | grep -B 8 "\"ollamaTag\": \"$installed_tag\"" | grep -o '"[^"]*": *{' | head -1 | tr -d '": {')
-    if [ -n "$MODEL_KEY" ]; then
-      DISPLAY_NAME=$(cat "$MODELS_JSON" | awk "/\"$MODEL_KEY\":/,/^\s*\}/" | grep displayName | cut -d'"' -f4)
-    else
-      DISPLAY_NAME="$installed_tag"
-    fi
-  fi
-
-  if [ "$FIRST" = true ]; then
-    FIRST=false
-  else
-    MODELS_ARRAY+="," 
-  fi
-
-  MODELS_ARRAY+="\n    {\n      \"title\": \"$DISPLAY_NAME\",\n      \"provider\": \"ollama\",\n      \"model\": \"$installed_tag\",\n      \"apiBase\": \"http://localhost:11434\"\n    }"
-done <<< "$INSTALLED"
-
-MODELS_ARRAY+="\n  ]"
-
 echo -e "${CYAN}Select model for CHAT (main interactions):${NC}"
 select CHAT_TAG in $INSTALLED; do
   if [ -n "$CHAT_TAG" ]; then
@@ -69,7 +36,8 @@ select AUTO_TAG in $INSTALLED; do
 done
 
 echo -e "\n${BLUE}Updating Continue configuration...${NC}"
-update_continue_config_native "$CHAT_TAG" "$AUTO_TAG" "$MODELS_ARRAY"
+MODELS_CSV="$(echo "$INSTALLED" | tr '\n' ',' | sed 's/,$//')"
+bash "$SCRIPT_DIR/generate_continue_config.sh" --mode native --models "$MODELS_CSV" --chat "$CHAT_TAG" --autocomplete "$AUTO_TAG"
 
 echo -e "\n${GREEN}✅ Configuration updated!${NC}"
 echo -e "${CYAN}Chat model: $CHAT_TAG${NC}"

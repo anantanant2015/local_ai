@@ -15,26 +15,6 @@ install_ollama_if_missing() {
   echo -e "${GREEN}✅ Ollama installed${NC}"
 }
 
-build_selected_models_json() {
-  local models_json="["
-  local first=true
-
-  for model_info in "${SELECTED_MODELS[@]}"; do
-    IFS='|' read -r tag name <<< "$model_info"
-
-    if [ "$first" = true ]; then
-      first=false
-    else
-      models_json+="," 
-    fi
-
-    models_json+="\n    {\n      \"title\": \"$name\",\n      \"provider\": \"ollama\",\n      \"model\": \"$tag\",\n      \"apiBase\": \"http://localhost:11434\"\n    }"
-  done
-
-  models_json+="\n  ]"
-  echo "$models_json"
-}
-
 echo -e "${CYAN}🚀 Native Ollama Setup (Non-Docker)${NC}\n"
 
 install_ollama_if_missing
@@ -81,7 +61,6 @@ for model_info in "${SELECTED_MODELS[@]}"; do
   fi
 done
 
-MODELS_ARRAY="$(build_selected_models_json)"
 CHAT_MODEL=""
 AUTOCOMPLETE_MODEL=""
 
@@ -103,7 +82,13 @@ if [ -z "$AUTOCOMPLETE_MODEL" ]; then
   AUTOCOMPLETE_MODEL="$CHAT_MODEL"
 fi
 
-update_continue_config_native "$CHAT_MODEL" "$AUTOCOMPLETE_MODEL" "$MODELS_ARRAY"
+MODELS_CSV=""
+for model_info in "${SELECTED_MODELS[@]}"; do
+  IFS='|' read -r tag _ <<< "$model_info"
+  [ -z "$MODELS_CSV" ] && MODELS_CSV="$tag" || MODELS_CSV="$MODELS_CSV,$tag"
+done
+
+bash "$SCRIPT_DIR/generate_continue_config.sh" --mode native --models "$MODELS_CSV" --chat "$CHAT_MODEL" --autocomplete "$AUTOCOMPLETE_MODEL"
 
 echo -e "\n${GREEN}✅ Native setup complete!${NC}"
 echo -e "${CYAN}Start: bash scripts/start_ollama_native.sh${NC}"

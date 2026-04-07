@@ -128,11 +128,9 @@ done
 # Configure Continue
 echo -e "\n${CYAN}🔧 Configuring Continue extension...${NC}"
 
-# Build models array
-MODELS_ARRAY="["
-FIRST=true
 AUTOCOMPLETE_MODEL=""
 SMALLEST_SIZE=999999
+MODELS_CSV=""
 
 for model_info in "${SELECTED_MODELS[@]}"; do
   IFS='|' read -r tag name <<< "$model_info"
@@ -153,27 +151,12 @@ for model_info in "${SELECTED_MODELS[@]}"; do
     AUTOCOMPLETE_MODEL=$tag
   fi
 
-  if [ "$FIRST" = true ]; then
-    FIRST=false
-  else
-    MODELS_ARRAY+=","
-  fi
-
-  MODELS_ARRAY+="
-    {
-      \"title\": \"$name\",
-      \"provider\": \"ollama\",
-      \"model\": \"$tag\",
-      \"apiBase\": \"http://localhost:11434\"
-    }"
+  [ -z "$MODELS_CSV" ] && MODELS_CSV="$tag" || MODELS_CSV="$MODELS_CSV,$tag"
 done
-
-MODELS_ARRAY+="
-  ]"
 
 # Use first selected model as chat model
 IFS='|' read -r CHAT_MODEL _ <<< "${SELECTED_MODELS[0]}"
-update_continue_config "$CHAT_MODEL" "$AUTOCOMPLETE_MODEL" "$MODELS_ARRAY"
+bash "$SCRIPT_DIR/generate_continue_config.sh" --mode docker --models "$MODELS_CSV" --chat "$CHAT_MODEL" --autocomplete "$AUTOCOMPLETE_MODEL"
 
 echo -e "\n${GREEN}✅ Setup complete!${NC}"
 echo -e "\n${CYAN}Next steps:${NC}"
