@@ -74,12 +74,12 @@ get_model_info() {
 pull_model() {
   local model_tag="$1"
   local display_name="$2"
-  
+
   echo -e "${CYAN}📥 Pulling $display_name ($model_tag)...${NC}"
   echo -e "${YELLOW}This may take several minutes depending on your internet speed.${NC}"
-  
+
   docker exec ollama-server ollama pull "$model_tag"
-  
+
   if [ $? -eq 0 ]; then
     echo -e "${GREEN}✅ Successfully pulled $display_name${NC}"
     return 0
@@ -92,17 +92,17 @@ pull_model() {
 # Display model selection menu
 show_model_menu() {
   local installed_models=$(list_installed_models)
-  
+
   echo -e "\n${CYAN}═══════════════════════════════════════════════════════════${NC}"
   echo -e "${CYAN}                  Available Models                          ${NC}"
   echo -e "${CYAN}═══════════════════════════════════════════════════════════${NC}\n"
-  
+
   local i=1
   declare -g -A MODEL_MAP
-  
+
   # Parse JSON properly using grep to extract each model block
   local model_keys=($(cat "$MODELS_JSON" | grep -o '"[^"]*": *{' | grep -o '"[^"]*"' | tr -d '"'))
-  
+
   for model_key in "${model_keys[@]}"; do
     # Extract model info using jq if available, otherwise use grep
     if command -v jq &> /dev/null; then
@@ -122,20 +122,20 @@ show_model_menu() {
       local description=$(echo "$model_block" | grep description | cut -d'"' -f4)
       local ollama_tag=$(echo "$model_block" | grep ollamaTag | cut -d'"' -f4)
     fi
-    
+
     local installed_marker=""
     if echo "$installed_models" | grep -q "^${ollama_tag}$"; then
       installed_marker="${GREEN}[installed]${NC}"
     fi
-    
+
     echo -e "${BLUE}[$i]${NC} ${YELLOW}$display_name${NC} $installed_marker"
     echo -e "    Size: $size | Memory: $memory | Quality: $quality"
     echo -e "    $description"
     echo ""
-    
+
     MODEL_MAP[$i]="$model_key"
     ((i++))
   done
-  
+
   export MODEL_COUNT=$((i-1))
 }

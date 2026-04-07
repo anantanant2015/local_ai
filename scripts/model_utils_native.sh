@@ -121,4 +121,3 @@ show_model_menu_native() {
 
   export MODEL_COUNT=$((i-1))
 }
-
