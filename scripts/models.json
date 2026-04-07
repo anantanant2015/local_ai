@@ -58,5 +58,55 @@
     "description": "Lightweight model for resource-constrained environments",
     "ollamaTag": "orca-mini:latest",
     "recommended": "autocomplete"
+  },
+  "qwen25-coder-7b": {
+    "displayName": "Qwen 2.5 Coder 7B",
+    "size": "4.7 GB",
+    "memoryRequired": "6.0 GB",
+    "speed": "medium",
+    "quality": "excellent-code",
+    "description": "Strong coding model for reasoning, refactoring, and multi-file generation",
+    "ollamaTag": "qwen2.5-coder:7b",
+    "recommended": "chat"
+  },
+  "qwen25-coder-3b": {
+    "displayName": "Qwen 2.5 Coder 3B",
+    "size": "2.0 GB",
+    "memoryRequired": "3.2 GB",
+    "speed": "fast",
+    "quality": "very-good-code",
+    "description": "Faster coding model for 16GB RAM systems with good code quality",
+    "ollamaTag": "qwen2.5-coder:3b",
+    "recommended": "autocomplete"
+  },
+  "phi3-mini": {
+    "displayName": "Phi-3 Mini",
+    "size": "2.2 GB",
+    "memoryRequired": "3.5 GB",
+    "speed": "fast",
+    "quality": "very-good",
+    "description": "Efficient general and coding model with low memory footprint",
+    "ollamaTag": "phi3:mini",
+    "recommended": "autocomplete"
+  },
+  "deepseek-coder-6.7b": {
+    "displayName": "DeepSeek Coder 6.7B",
+    "size": "3.8 GB",
+    "memoryRequired": "5.5 GB",
+    "speed": "medium",
+    "quality": "excellent-code",
+    "description": "Code-specialized model for generation and structured code edits",
+    "ollamaTag": "deepseek-coder:6.7b",
+    "recommended": "chat"
+  },
+  "starcoder2-7b": {
+    "displayName": "StarCoder2 7B",
+    "size": "4.1 GB",
+    "memoryRequired": "5.8 GB",
+    "speed": "medium",
+    "quality": "excellent-code",
+    "description": "Open code model for programming assistance and repository-level tasks",
+    "ollamaTag": "starcoder2:7b",
+    "recommended": "chat"
   }
 }
