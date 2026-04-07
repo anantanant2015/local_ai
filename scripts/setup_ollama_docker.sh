@@ -105,19 +105,19 @@ for choice in $choices; do
       DISPLAY_NAME=$(cat "$MODELS_JSON" | awk "/\"$MODEL_KEY\":/,/^\s*\}/" | grep displayName | cut -d'"' -f4)
     fi
 
-    SELECTED_MODELS+=("$OLLAMA_TAG:$DISPLAY_NAME")
+    SELECTED_MODELS+=("$OLLAMA_TAG|$DISPLAY_NAME")
   fi
 done
 
 if [ ${#SELECTED_MODELS[@]} -eq 0 ]; then
   echo -e "${YELLOW}No models selected. Using default: Phi${NC}"
-  SELECTED_MODELS=("phi:latest:Phi-2")
+  SELECTED_MODELS=("phi:latest|Phi-2")
 fi
 
 # Download selected models
 echo -e "\n${CYAN}📥 Downloading selected models...${NC}"
 for model_info in "${SELECTED_MODELS[@]}"; do
-  IFS=':' read -r tag name <<< "$model_info"
+  IFS='|' read -r tag name <<< "$model_info"
   if ! is_model_installed "$tag"; then
     pull_model "$tag" "$name"
   else
@@ -135,7 +135,7 @@ AUTOCOMPLETE_MODEL=""
 SMALLEST_SIZE=999999
 
 for model_info in "${SELECTED_MODELS[@]}"; do
-  IFS=':' read -r tag name <<< "$model_info"
+  IFS='|' read -r tag name <<< "$model_info"
 
   # Find model key and get size
   if command -v jq &> /dev/null; then
@@ -171,8 +171,8 @@ done
 MODELS_ARRAY+="
   ]"
 
-# Use first model as chat if only one selected
-CHAT_MODEL="${SELECTED_MODELS[0]%%:*}"
+# Use first selected model as chat model
+IFS='|' read -r CHAT_MODEL _ <<< "${SELECTED_MODELS[0]}"
 update_continue_config "$CHAT_MODEL" "$AUTOCOMPLETE_MODEL" "$MODELS_ARRAY"
 
 echo -e "\n${GREEN}✅ Setup complete!${NC}"

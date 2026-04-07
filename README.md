@@ -20,9 +20,39 @@ All setup tasks completed:
 
 ## Quick Start
 
+### Native (Non-Docker) Quick Start
+
+Use this path if you want the simplest setup and faster startup with direct Ollama installation.
+
+```bash
+make setup-native
+make start-native
+```
+
+Stop when done:
+
+```bash
+make stop-native
+```
+
+Enable Ubuntu auto-start on boot:
+
+```bash
+make enable-autostart-ubuntu
+```
+
+This creates a systemd service (`ollama-local-ai.service`) on Ubuntu only.
+
+Disable/remove Ubuntu auto-start service:
+
+```bash
+make disable-autostart-ubuntu
+```
+
 ### Prerequisites
 
-- **Docker** (running, with compose support)
+- **Docker** (running, with compose support) for Docker mode
+- **Ubuntu/Linux + curl** for native non-Docker mode (Ollama installer)
 - **VS Code** with Continue extension
 - **~10GB+ disk space** (Docker image + models)
 - **System RAM:** 4GB minimum (8GB+ recommended for multiple models)
@@ -103,6 +133,16 @@ The extension will connect to `http://localhost:11434` automatically.
 | `make clean` | Stop and remove container |
 | `make help` | Show all commands |
 
+### Native (Non-Docker) Operations
+
+| Command | Purpose |
+|---------|---------|
+| `make setup-native` | Install Ollama (if missing), start native server, pull selected models |
+| `make start-native` | Start `ollama serve` directly on host |
+| `make stop-native` | Stop native Ollama process/service |
+| `make enable-autostart-ubuntu` | Create and enable Ubuntu systemd service for boot startup |
+| `make disable-autostart-ubuntu` | Disable and remove Ubuntu systemd autostart service |
+
 ### Model Management
 
 | Command | Purpose |
@@ -110,6 +150,9 @@ The extension will connect to `http://localhost:11434` automatically.
 | `make list-models` | View available models and installation status |
 | `make add-model` | Download additional models interactively |
 | `make switch` | Switch active chat and autocomplete models |
+| `make list-models-native` | View available models and status for native Ollama |
+| `make add-model-native` | Download additional models using native Ollama |
+| `make switch-native` | Switch active chat and autocomplete models for native Ollama |
 
 The `local_ai_agent/` directory is **completely self-contained**:
 is repository is **completely self-contained**:
@@ -137,6 +180,11 @@ No server management needed—everything is local Docker.
 | **Llama2 7B** | 3.8 GB | 4.5 GB | General conversation |
 | **Neural Chat 7B** | 4.1 GB | 4.8 GB | Dialogue optimization |
 | **Orca Mini 3B** | 1.9 GB | 3.0 GB | Lightweight alternative |
+| **Qwen 2.5 Coder 7B** | 4.7 GB | 6.0 GB | Strong coding and reasoning |
+| **Qwen 2.5 Coder 3B** | 2.0 GB | 3.2 GB | Fast coding on 16GB systems |
+| **Phi-3 Mini** | 2.2 GB | 3.5 GB | Efficient coding/general usage |
+| **DeepSeek Coder 6.7B** | 3.8 GB | 5.5 GB | Code generation and edits |
+| **StarCoder2 7B** | 4.1 GB | 5.8 GB | Open code-assistant model |
 
 ## Configuration
 

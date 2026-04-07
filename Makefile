@@ -1,4 +1,4 @@
-.PHONY: help setup start stop clean logs list-models add-model switch
+.PHONY: help setup start stop clean logs list-models add-model switch setup-native start-native stop-native enable-autostart-ubuntu disable-autostart-ubuntu list-models-native add-model-native switch-native
 
 help:
 	@echo "📋 Local AI Agent - Available Commands"
@@ -9,9 +9,18 @@ help:
 	@echo "  make logs         - Show recent container logs"
 	@echo "  make clean        - Stop container and remove it"
 	@echo ""
+	@echo "  make setup-native - Interactive non-Docker setup (installs ollama + pulls models)"
+	@echo "  make start-native - Start native ollama serve"
+	@echo "  make stop-native  - Stop native ollama serve"
+	@echo "  make enable-autostart-ubuntu - Enable Ubuntu boot autostart via systemd"
+	@echo "  make disable-autostart-ubuntu - Disable and remove Ubuntu boot autostart service"
+	@echo ""
 	@echo "  make list-models  - View available models and status"
 	@echo "  make add-model    - Download additional models"
 	@echo "  make switch       - Switch active chat/autocomplete models"
+	@echo "  make list-models-native - View available models/status for native Ollama"
+	@echo "  make add-model-native   - Download additional models for native Ollama"
+	@echo "  make switch-native      - Switch native chat/autocomplete models"
 	@echo ""
 	@echo "🔧 Configuration:"
 	@echo "  - Docker daemon: /etc/docker/daemon.json (4GB memory + 6GB swap)"
@@ -43,5 +52,29 @@ add-model:
 
 switch:
 	@bash scripts/switch_model.sh
+
+setup-native:
+	@bash scripts/setup_ollama_native.sh
+
+start-native:
+	@bash scripts/start_ollama_native.sh
+
+stop-native:
+	@bash scripts/stop_ollama_native.sh
+
+enable-autostart-ubuntu:
+	@bash scripts/enable_ollama_autostart_ubuntu.sh
+
+disable-autostart-ubuntu:
+	@bash scripts/disable_ollama_autostart_ubuntu.sh
+
+list-models-native:
+	@bash scripts/list_models_native.sh
+
+add-model-native:
+	@bash scripts/add_model_native.sh
+
+switch-native:
+	@bash scripts/switch_model_native.sh
 
 .DEFAULT_GOAL := help
