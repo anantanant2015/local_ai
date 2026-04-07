@@ -13,7 +13,6 @@ NC='\033[0m'
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 MODELS_JSON="$SCRIPT_DIR/models.json"
-CONFIG_FILE="$PROJECT_ROOT/continue_config.json"
 
 is_ubuntu() {
   [ -f /etc/os-release ] && grep -qi '^ID=ubuntu' /etc/os-release
@@ -123,28 +122,3 @@ show_model_menu_native() {
   export MODEL_COUNT=$((i-1))
 }
 
-update_continue_config_native() {
-  local chat_model="$1"
-  local autocomplete_model="$2"
-  local all_models="$3"
-
-  cp "$CONFIG_FILE" "$CONFIG_FILE.backup" 2>/dev/null || true
-
-  cat > "$CONFIG_FILE" <<EOF
-{
-  "models": $all_models,
-  "tabAutocompleteModel": {
-    "title": "Autocomplete",
-    "provider": "ollama",
-    "model": "$autocomplete_model",
-    "apiBase": "http://localhost:11434"
-  },
-  "slashCommands": [
-    { "name": "share", "description": "Export the current chat" },
-    { "name": "commit", "description": "Generate a git commit message" }
-  ]
-}
-EOF
-
-  echo -e "${GREEN}✅ Updated continue_config.json${NC}"
-}

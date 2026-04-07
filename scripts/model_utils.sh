@@ -15,7 +15,6 @@ NC='\033[0m' # No Color
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 MODELS_JSON="$SCRIPT_DIR/models.json"
-CONFIG_FILE="$PROJECT_ROOT/continue_config.json"
 
 # Check if Docker is running
 check_docker() {
@@ -88,47 +87,6 @@ pull_model() {
     echo -e "${RED}❌ Failed to pull $display_name${NC}"
     return 1
   fi
-}
-
-# Update continue_config.json
-update_continue_config() {
-  local chat_model="$1"
-  local autocomplete_model="$2"
-  local all_models="$3"  # JSON array string
-  
-  # Backup current config
-  cp "$CONFIG_FILE" "$CONFIG_FILE.backup"
-  
-  # Create new config using jq if available, otherwise use sed
-  if command -v jq &> /dev/null; then
-    local models_array=$(echo "$all_models" | jq -c '.')
-    jq --arg chat "$chat_model" \
-       --arg auto "$autocomplete_model" \
-       --argjson models "$models_array" \
-       '.models = $models | 
-        .tabAutocompleteModel.model = $auto |
-        .tabAutocompleteModel.title = ($models[] | select(.model == $auto) | .title)' \
-       "$CONFIG_FILE.backup" > "$CONFIG_FILE"
-  else
-    # Fallback: manual JSON construction
-    cat > "$CONFIG_FILE" <<EOF
-{
-  "models": $all_models,
-  "tabAutocompleteModel": {
-    "title": "Autocomplete",
-    "provider": "ollama",
-    "model": "$autocomplete_model",
-    "apiBase": "http://localhost:11434"
-  },
-  "slashCommands": [
-    { "name": "share", "description": "Export the current chat" },
-    { "name": "commit", "description": "Generate a git commit message" }
-  ]
-}
-EOF
-  fi
-  
-  echo -e "${GREEN}✅ Updated continue_config.json${NC}"
 }
 
 # Display model selection menu
