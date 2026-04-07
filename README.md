@@ -43,6 +43,12 @@ make enable-autostart-ubuntu
 
 This creates a systemd service (`ollama-local-ai.service`) on Ubuntu only.
 
+Disable/remove Ubuntu auto-start service:
+
+```bash
+make disable-autostart-ubuntu
+```
+
 ### Prerequisites
 
 - **Docker** (running, with compose support) for Docker mode
@@ -135,6 +141,7 @@ The extension will connect to `http://localhost:11434` automatically.
 | `make start-native` | Start `ollama serve` directly on host |
 | `make stop-native` | Stop native Ollama process/service |
 | `make enable-autostart-ubuntu` | Create and enable Ubuntu systemd service for boot startup |
+| `make disable-autostart-ubuntu` | Disable and remove Ubuntu systemd autostart service |
 
 ### Model Management
 
@@ -143,6 +150,9 @@ The extension will connect to `http://localhost:11434` automatically.
 | `make list-models` | View available models and installation status |
 | `make add-model` | Download additional models interactively |
 | `make switch` | Switch active chat and autocomplete models |
+| `make list-models-native` | View available models and status for native Ollama |
+| `make add-model-native` | Download additional models using native Ollama |
+| `make switch-native` | Switch active chat and autocomplete models for native Ollama |
 
 The `local_ai_agent/` directory is **completely self-contained**:
 is repository is **completely self-contained**:
