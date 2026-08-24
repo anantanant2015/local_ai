@@ -1,4 +1,4 @@
-.PHONY: help setup start stop clean logs list-models add-model switch setup-native start-native stop-native enable-autostart-ubuntu disable-autostart-ubuntu list-models-native add-model-native switch-native unload-models-native generate-continue-config-native generate-continue-config smoke smoke-native
+.PHONY: help setup start stop clean logs list-models add-model switch setup-native start-native stop-native enable-autostart-ubuntu disable-autostart-ubuntu list-models-native add-model-native switch-native unload-models-native generate-continue-config-native generate-continue-config smoke smoke-native ci
 
 help:
 	@echo "📋 Local AI Agent - Available Commands"
@@ -26,6 +26,7 @@ help:
 	@echo "  make unload-models-native - Unload currently loaded native Ollama models from RAM"
 	@echo "  make smoke          - POST /api/generate smoke (MODEL=tag required)"
 	@echo "  make smoke-native   - Same smoke against native loopback Ollama"
+	@echo "  make ci             - Local syntax checks (compose, bash -n, JSON, make help)"
 	@echo ""
 	@echo "🔧 Configuration:"
 	@echo "  - Docker Compose: ./docker-compose.yml (container mem_limit 4g, loopback :11434)"
@@ -95,5 +96,12 @@ smoke:
 
 smoke-native:
 	@bash scripts/smoke_ollama.sh "$(MODEL)"
+
+ci:
+	docker compose config -q
+	@for script in scripts/*.sh; do bash -n "$$script"; done
+	python3 -m json.tool scripts/models.json > /dev/null
+	python3 -m json.tool continue_config.json > /dev/null
+	@$(MAKE) help > /dev/null
 
 .DEFAULT_GOAL := help
