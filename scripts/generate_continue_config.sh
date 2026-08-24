@@ -193,6 +193,12 @@ for tag in "${INCLUDED_MODELS[@]}"; do
 done
 INCLUDED_MODELS=("${ORDERED_MODELS[@]}")
 
+SMOKE_SCRIPT="$SCRIPT_DIR/smoke_ollama.sh"
+bash "$SMOKE_SCRIPT" "$CHAT_MODEL"
+if [ "$AUTO_MODEL" != "$CHAT_MODEL" ]; then
+  bash "$SMOKE_SCRIPT" "$AUTO_MODEL"
+fi
+
 mkdir -p "$(dirname "$OUTPUT_FILE")"
 [ -f "$OUTPUT_FILE" ] && cp "$OUTPUT_FILE" "$OUTPUT_FILE.backup"
 

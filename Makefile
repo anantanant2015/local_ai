@@ -1,4 +1,4 @@
-.PHONY: help setup start stop clean logs list-models add-model switch setup-native start-native stop-native enable-autostart-ubuntu disable-autostart-ubuntu list-models-native add-model-native switch-native unload-models-native generate-continue-config-native generate-continue-config
+.PHONY: help setup start stop clean logs list-models add-model switch setup-native start-native stop-native enable-autostart-ubuntu disable-autostart-ubuntu list-models-native add-model-native switch-native unload-models-native generate-continue-config-native generate-continue-config smoke smoke-native
 
 help:
 	@echo "📋 Local AI Agent - Available Commands"
@@ -24,6 +24,8 @@ help:
 	@echo "  make generate-continue-config-native - Interactive Continue config generator (native)"
 	@echo "  make generate-continue-config        - Interactive Continue config generator (docker)"
 	@echo "  make unload-models-native - Unload currently loaded native Ollama models from RAM"
+	@echo "  make smoke          - POST /api/generate smoke (MODEL=tag required)"
+	@echo "  make smoke-native   - Same smoke against native loopback Ollama"
 	@echo ""
 	@echo "🔧 Configuration:"
 	@echo "  - Docker daemon: /etc/docker/daemon.json (4GB memory + 6GB swap)"
@@ -88,5 +90,11 @@ generate-continue-config-native:
 
 generate-continue-config:
 	@bash scripts/generate_continue_config.sh --mode docker
+
+smoke:
+	@bash scripts/smoke_ollama.sh "$(MODEL)"
+
+smoke-native:
+	@bash scripts/smoke_ollama.sh "$(MODEL)"
 
 .DEFAULT_GOAL := help

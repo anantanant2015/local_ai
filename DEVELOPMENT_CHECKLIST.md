@@ -25,7 +25,7 @@ Phase 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. Do not start N+1 until N exit
 | 1 | Quant catalog | P0 | ✅ DONE | 8 | 1 day |
 | 2 | Loopback and memory honesty | P0 | ✅ DONE | 7 | 0.5 day |
 | 3 | Cursor and VS Code Continue | P0 | ✅ DONE | 8 | 1 day |
-| 4 | Serve/generate smoke | P1 | ⚪ TODO | 6 | 0.5 day |
+| 4 | Serve/generate smoke | P1 | ✅ DONE | 6 | 0.5 day |
 | 5 | Fix list-models / YAML | P1 | ⚪ TODO | 5 | 0.5 day |
 | 6 | Stop daemon.json smash | P1 | ⚪ TODO | 5 | 0.5 day |
 | 7 | Spec, docs track, honest CI | P2 | ⚪ TODO | 7 | 0.5 day |
@@ -204,7 +204,7 @@ Phase 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. Do not start N+1 until N exit
 
 ## Phase 4: Serve/generate smoke (P1)
 
-**Status:** ⚪ TODO  
+**Status:** ✅ DONE  
 **Goal:** Do not write Continue config until a one-token generate succeeds on the chosen model.  
 **Prerequisites:** Phase 1 (tags exist); Phase 3 (generator still the writer)  
 **Estimated effort:** 0.5 day
@@ -229,9 +229,9 @@ Phase 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. Do not start N+1 until N exit
 
 ### 4.1 — Smoke script
 
-- [ ] **4.1.1** Script exits non-zero if port down, model missing, or generate fails
-- [ ] **4.1.2** Setup/switch/generate refuse to write YAML when smoke fails (clear error)
-- [ ] **4.1.3** Healthcheck in compose does not use a missing `curl` binary
+- [x] **4.1.1** Script exits non-zero if port down, model missing, or generate fails
+- [x] **4.1.2** Setup/switch/generate refuse to write YAML when smoke fails (clear error)
+- [x] **4.1.3** Healthcheck in compose does not use a missing `curl` binary
 
 ### 4.2 — Exit
 
