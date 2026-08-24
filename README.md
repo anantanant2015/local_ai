@@ -15,7 +15,6 @@ All setup tasks completed:
 - [x] Support for multiple models (Phi, Mistral, CodeLlama, etc.)
 - [x] Memory-aware model recommendations
 - [x] Persistent docker-compose configuration
-- [x] Docker daemon memory optimization (4GB initial + 6GB swap)
 - [x] CI/CD pipeline with GitHub Actions
 
 ## Quick Start
@@ -60,11 +59,7 @@ make disable-autostart-ubuntu
 
 ### Memory Configuration
 
-The setup automatically configures Docker for optimal resource usage:
-- **Initial memory**: 4 GB (efficient for daily use)
-- **Swap memory**: 6 GB (used only when needed)
-- **Total limit**: 10 GB max
-- **Config location**: `/etc/docker/daemon.json` (auto-configured during setup)
+Docker **container** limits live in `docker-compose.yml` (`mem_limit: 4g`). Setup does **not** write `/etc/docker/daemon.json`. Swap is thrash, not speed.
 
 ### Setup (One-time)
 
@@ -73,20 +68,18 @@ make setup
 ```
 
 **Interactive Setup Process:**
-1. Configures Docker daemon (`/etc/docker/daemon.json`): 4GB memory + 6GB swap
-2. Pulls Ollama Docker image
-3. Creates and starts container with `docker-compose`
-4. Shows available models with specs (size, memory, quality)
-5. Lets you choose which models to download
-6. Configures Continue automatically for `/home/<user>/.continue/config.yaml`
+1. Pulls Ollama Docker image
+2. Creates and starts container with `docker-compose`
+3. Shows available models with specs (size, memory, quant, quality)
+4. Lets you choose which models to download (RAM gate may refuse 7B under 4g)
+5. Configures Continue automatically for `~/.continue/config.yaml`
 
 **What's configured automatically:**
-- ✅ Docker daemon memory limits
-- ✅ Persistent `docker-compose.yml` for auto-restart
-- ✅ Continue extension config with Phi-2 for autocomplete
-- ✅ Swap memory as fallback
+- Persistent `docker-compose.yml` for auto-restart
+- Continue YAML at `~/.continue/config.yaml`
+- Container `mem_limit: 4g` (not host `/etc/docker/daemon.json`)
 
-**Default recommendation:** Start with Phi (1.6GB, fast) for autocomplete
+**Default recommendation:** Start with TinyLlama Q4_K_M for autocomplete
 
 **⏱️ First-time setup:** 5–30 minutes depending on models selected and internet speed
 
@@ -220,17 +213,8 @@ make start
 
 ### Memory Optimization
 
-The setup configures two levels of memory management:
+Memory is capped on the **container** only (`docker-compose.yml`). Setup never writes `/etc/docker/daemon.json`.
 
-**1. Docker Daemon** (`/etc/docker/daemon.json`):
-```json
-{
-  "memory": 4294967296,
-  "memswap": 10737418240
-}
-```
-
-**2. Container** (`docker-compose.yml`):
 ```yaml
 mem_limit: 4g
 memswap_limit: 10g
@@ -309,8 +293,8 @@ Ensure sufficient disk space and stable internet. Model files go to Docker volum
 
 ## Files
 
-- `docker-compose.yml` — Persistent container configuration (4GB memory + 6GB swap)
-- `scripts/setup_ollama_docker.sh` — Interactive setup with daemon.json configuration
+- `docker-compose.yml` — Persistent container configuration (4g mem_limit, loopback 11434)
+- `scripts/setup_ollama_docker.sh` — Interactive Docker setup (does not write daemon.json)
 - `scripts/start_dev_environment.sh` — Start container using docker-compose
 - `scripts/add_model.sh` — Download additional models
 - `scripts/switch_model.sh` — Switch active models

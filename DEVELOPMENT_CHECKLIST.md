@@ -27,7 +27,7 @@ Phase 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. Do not start N+1 until N exit
 | 3 | Cursor and VS Code Continue | P0 | ✅ DONE | 8 | 1 day |
 | 4 | Serve/generate smoke | P1 | ✅ DONE | 6 | 0.5 day |
 | 5 | Fix list-models / YAML | P1 | ✅ DONE | 5 | 0.5 day |
-| 6 | Stop daemon.json smash | P1 | ⚪ TODO | 5 | 0.5 day |
+| 6 | Stop daemon.json smash | P1 | ✅ DONE | 5 | 0.5 day |
 | 7 | Spec, docs track, honest CI | P2 | ⚪ TODO | 7 | 0.5 day |
 | 8 | Collapse native/Docker dup | P2 | ⚪ TODO | 6 | 1.5 days |
 
@@ -277,7 +277,7 @@ Phase 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. Do not start N+1 until N exit
 
 ## Phase 6: Stop daemon.json smash (P1)
 
-**Status:** ⚪ TODO  
+**Status:** ✅ DONE  
 **Goal:** Setup never overwrites host `/etc/docker/daemon.json` with a 4g global memory cap.  
 **Prerequisites:** Phase 2 (container limits are the control plane)  
 **Estimated effort:** 0.5 day
@@ -299,14 +299,14 @@ Phase 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. Do not start N+1 until N exit
 
 ### 6.1 — Setup
 
-- [ ] **6.1.1** Remove or gate daemon.json mutation
-- [ ] **6.1.2** README Memory Configuration matches (container-only)
-- [ ] **6.1.3** `bash -n scripts/setup_ollama_docker.sh`
+- [x] **6.1.1** Remove or gate daemon.json mutation
+- [x] **6.1.2** README Memory Configuration matches (container-only)
+- [x] **6.1.3** `bash -n scripts/setup_ollama_docker.sh`
 
 ### 6.2 — Exit
 
-- [ ] **6.2.1** Grep setup script: no unconditional write to `/etc/docker/daemon.json`
-- [ ] **6.2.2** Mark Phase 6 complete
+- [x] **6.2.1** Grep setup script: no unconditional write to `/etc/docker/daemon.json`
+- [x] **6.2.2** Mark Phase 6 complete
 
 ---
 

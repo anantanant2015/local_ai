@@ -10,34 +10,6 @@ echo -e "${CYAN}🚀 Interactive Ollama Setup${NC}\n"
 # Check if Docker is running
 check_docker
 
-# Configure Docker daemon for optimal memory usage
-echo -e "${BLUE}🔧 Configuring Docker daemon for optimal memory...${NC}"
-DAEMON_JSON="/etc/docker/daemon.json"
-if [ ! -f "$DAEMON_JSON" ]; then
-  sudo bash -c 'echo "{}" > '"$DAEMON_JSON"
-fi
-
-# Check if memory is already configured
-if ! sudo grep -q '"memory"' "$DAEMON_JSON"; then
-  echo -e "${YELLOW}Setting up Docker daemon memory configuration...${NC}"
-  sudo tee "$DAEMON_JSON" > /dev/null <<EOF
-{
-  "memory": 4294967296,
-  "memswap": 10737418240,
-  "log-driver": "json-file",
-  "log-opts": {
-    "max-size": "10m",
-    "max-file": "3"
-  }
-}
-EOF
-  echo -e "${GREEN}✅ Docker daemon configured: 4GB memory + 6GB swap${NC}"
-  echo -e "${YELLOW}⚠️  Note: Restart Docker for changes to take effect${NC}"
-  echo -e "${BLUE}   Run: sudo systemctl restart docker${NC}\n"
-else
-  echo -e "${GREEN}✅ Docker daemon already configured${NC}\n"
-fi
-
 # Pull Ollama image
 echo -e "${BLUE}📥 Pulling Ollama image...${NC}"
 docker pull ollama/ollama:latest

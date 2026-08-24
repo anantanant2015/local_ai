@@ -3,7 +3,7 @@
 help:
 	@echo "📋 Local AI Agent - Available Commands"
 	@echo ""
-	@echo "  make setup        - Interactive setup: configure Docker daemon + docker-compose"
+	@echo "  make setup        - Interactive setup: docker compose + models + Continue"
 	@echo "  make start        - Start Ollama container with persistent configuration"
 	@echo "  make stop         - Stop Ollama container"
 	@echo "  make logs         - Show recent container logs"
@@ -28,8 +28,7 @@ help:
 	@echo "  make smoke-native   - Same smoke against native loopback Ollama"
 	@echo ""
 	@echo "🔧 Configuration:"
-	@echo "  - Docker daemon: /etc/docker/daemon.json (4GB memory + 6GB swap)"
-	@echo "  - Docker Compose: ./docker-compose.yml (persistent setup)"
+	@echo "  - Docker Compose: ./docker-compose.yml (container mem_limit 4g, loopback :11434)"
 	@echo "  - Continue config: ~/.continue/config.yaml"
 
 setup:
