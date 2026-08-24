@@ -26,7 +26,7 @@ Phase 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. Do not start N+1 until N exit
 | 2 | Loopback and memory honesty | P0 | ✅ DONE | 7 | 0.5 day |
 | 3 | Cursor and VS Code Continue | P0 | ✅ DONE | 8 | 1 day |
 | 4 | Serve/generate smoke | P1 | ✅ DONE | 6 | 0.5 day |
-| 5 | Fix list-models / YAML | P1 | ⚪ TODO | 5 | 0.5 day |
+| 5 | Fix list-models / YAML | P1 | ✅ DONE | 5 | 0.5 day |
 | 6 | Stop daemon.json smash | P1 | ⚪ TODO | 5 | 0.5 day |
 | 7 | Spec, docs track, honest CI | P2 | ⚪ TODO | 7 | 0.5 day |
 | 8 | Collapse native/Docker dup | P2 | ⚪ TODO | 6 | 1.5 days |
@@ -235,14 +235,14 @@ Phase 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. Do not start N+1 until N exit
 
 ### 4.2 — Exit
 
-- [ ] **4.2.1** `bash -n` on new/changed scripts; `make help` lists smoke if added
-- [ ] **4.2.2** Mark Phase 4 complete; honesty: Continue UI handshake still untested
+- [x] **4.2.1** `bash -n` on new/changed scripts; `make help` lists smoke if added
+- [x] **4.2.2** Mark Phase 4 complete; honesty: Continue UI handshake still untested
 
 ---
 
 ## Phase 5: Fix list-models / YAML (P1)
 
-**Status:** ⚪ TODO  
+**Status:** ✅ DONE  
 **Goal:** `make list-models` / `list-models-native` show Continue chat + autocomplete from `~/.continue/config.yaml` without unset `CONFIG_FILE` or `jq` on YAML.  
 **Prerequisites:** Phase 3 (YAML layout known)  
 **Estimated effort:** 0.5 day
@@ -264,14 +264,14 @@ Phase 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. Do not start N+1 until N exit
 
 ### 5.1 — Read path
 
-- [ ] **5.1.1** Define `CONFIG_FILE`; if missing, print path and skip Continue section (no empty `jq` error)
-- [ ] **5.1.2** Parse YAML; print chat + autocomplete tags
-- [ ] **5.1.3** `bash -n` both list scripts
+- [x] **5.1.1** Define `CONFIG_FILE`; if missing, print path and skip Continue section (no empty `jq` error)
+- [x] **5.1.2** Parse YAML; print chat + autocomplete tags
+- [x] **5.1.3** `bash -n` both list scripts
 
 ### 5.2 — Exit
 
-- [ ] **5.2.1** With a generated YAML fixture in a temp `--output` file, parser finds the expected tags (document the one-liner used)
-- [ ] **5.2.2** Mark Phase 5 complete
+- [x] **5.2.1** With a generated YAML fixture in a temp `--output` file, parser finds the expected tags (document the one-liner used)
+- [x] **5.2.2** Mark Phase 5 complete
 
 ---
 

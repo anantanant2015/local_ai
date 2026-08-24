@@ -5,6 +5,43 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/model_utils.sh"
 
+CONFIG_FILE="${HOME}/.continue/config.yaml"
+# Fixture check: generate_continue_config.sh --output /tmp/cfg.yaml then this parser's first two lines are chat and autocomplete tags.
+
+print_continue_from_yaml() {
+  local path="${1:-$CONFIG_FILE}"
+  if [ ! -f "$path" ]; then
+    echo -e "${YELLOW}⚠️  No Continue config found at $path${NC}"
+    return
+  fi
+
+  python3 - "$path" <<'PY'
+import sys
+path = sys.argv[1]
+chat = None
+auto = None
+in_models = False
+in_auto = False
+with open(path, encoding="utf-8") as fh:
+    for raw in fh:
+        line = raw.strip()
+        if line == "models:":
+            in_models = True
+            in_auto = False
+            continue
+        if line.startswith("tabAutocompleteModel:"):
+            in_auto = True
+            in_models = False
+            continue
+        if in_models and chat is None and line.startswith("model:"):
+            chat = line.split(":", 1)[1].strip()
+        elif in_auto and auto is None and line.startswith("model:"):
+            auto = line.split(":", 1)[1].strip()
+print(chat or "none")
+print(auto or "none")
+PY
+}
+
 echo -e "${CYAN}🤖 Ollama Models Overview${NC}\n"
 
 # Check prerequisites
@@ -23,18 +60,12 @@ echo -e "${CYAN}              Currently Configured in Continue             ${NC}
 echo -e "${CYAN}═══════════════════════════════════════════════════════════${NC}\n"
 
 if [ -f "$CONFIG_FILE" ]; then
-  if command -v jq &> /dev/null; then
-    CHAT_MODELS=$(jq -r '.models[].model' "$CONFIG_FILE" 2>/dev/null | tr '\n' ', ' | sed 's/,$//')
-    AUTO_MODEL=$(jq -r '.tabAutocompleteModel.model' "$CONFIG_FILE" 2>/dev/null)
-    
-    echo -e "${GREEN}Chat models:${NC} $CHAT_MODELS"
-    echo -e "${GREEN}Autocomplete:${NC} $AUTO_MODEL"
-  else
-    echo -e "${YELLOW}Install 'jq' to see configured models${NC}"
-    echo -e "Config file: $CONFIG_FILE"
-  fi
+  mapfile -t CONTINUE_TAGS < <(print_continue_from_yaml "$CONFIG_FILE")
+  echo -e "${GREEN}Chat models:${NC} ${CONTINUE_TAGS[0]:-none}"
+  echo -e "${GREEN}Autocomplete:${NC} ${CONTINUE_TAGS[1]:-none}"
 else
   echo -e "${YELLOW}⚠️  No Continue config found${NC}"
+  echo -e "Config file: $CONFIG_FILE"
 fi
 
 # Show Docker memory info
