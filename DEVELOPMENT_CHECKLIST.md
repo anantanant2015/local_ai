@@ -22,7 +22,7 @@ Phase 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. Do not start N+1 until N exit
 
 | Phase | Name | Priority | Status | Items | Estimate |
 |------:|------|----------|--------|------:|----------|
-| 1 | Quant catalog | P0 | ⚪ TODO | 8 | 1 day |
+| 1 | Quant catalog | P0 | ✅ DONE | 8 | 1 day |
 | 2 | Loopback and memory honesty | P0 | ⚪ TODO | 7 | 0.5 day |
 | 3 | Cursor and VS Code Continue | P0 | ⚪ TODO | 8 | 1 day |
 | 4 | Serve/generate smoke | P1 | ⚪ TODO | 6 | 0.5 day |
@@ -67,8 +67,7 @@ Phase 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. Do not start N+1 until N exit
 
 ## Phase 1: Quant catalog (P0)
 
-**Status:** ⚪ TODO  
-**Goal:** Operators pick an explicit quantized GGUF tag; RAM/quality is visible; default 7B pulls are Q4-class, not unnamed `:latest`.  
+**Status:** ✅ DONE  
 **Prerequisites:** none  
 **Estimated effort:** 1 day
 
@@ -94,21 +93,21 @@ Phase 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. Do not start N+1 until N exit
 
 ### 1.1 — Catalog schema
 
-- [ ] **1.1.1** Add per-model fields: `quantization`, `ollamaTag` (quant-specific), keep `size` / `memoryRequired` honest for that quant
-- [ ] **1.1.2** Default chat 7B entries use an explicit Q4 tag, not `:latest`, after tag verification
-- [ ] **1.1.3** Autocomplete entries (tinyllama, phi, phi3-mini, qwen 3b) use explicit small Q4 tags
+- [x] **1.1.1** Add per-model fields: `quantization`, `ollamaTag` (quant-specific), keep `size` / `memoryRequired` honest for that quant
+- [x] **1.1.2** Default chat 7B entries use an explicit Q4 tag, not `:latest`, after tag verification
+- [x] **1.1.3** Autocomplete entries (tinyllama, phi, phi3-mini, qwen 3b) use explicit small Q4 tags
 
 ### 1.2 — Operator display and RAM gate
 
-- [ ] **1.2.1** Model menus print `Quant: Q4_K_M` (or actual) beside size/memory
-- [ ] **1.2.2** Before pull, compare `memoryRequired` to Docker `mem_limit` (docker mode) or `/proc/meminfo` MemAvailable (native); abort 7B pull when over cap with a one-line reason
-- [ ] **1.2.3** README model table lists quant; remove implication that unnamed `:latest` is the performance target
+- [x] **1.2.1** Model menus print `Quant: Q4_K_M` (or actual) beside size/memory
+- [x] **1.2.2** Before pull, compare `memoryRequired` to Docker `mem_limit` (docker mode) or `/proc/meminfo` MemAvailable (native); abort 7B pull when over cap with a one-line reason
+- [x] **1.2.3** README model table lists quant; remove implication that unnamed `:latest` is the performance target
 
 ### 1.3 — Exit
 
-- [ ] **1.3.1** `python3 -m json.tool scripts/models.json` passes; `bash -n` on touched scripts
-- [ ] **1.3.2** Document honesty: Ollama still may remap tags internally; catalog **names** the quant we request
-- [ ] **1.3.3** Mark Phase 1 complete only if at least one verified Q4 tag is the documented default for a 7B chat model
+- [x] **1.3.1** `python3 -m json.tool scripts/models.json` passes; `bash -n` on touched scripts
+- [x] **1.3.2** Document honesty: Ollama still may remap tags internally; catalog **names** the quant we request
+- [x] **1.3.3** Mark Phase 1 complete only if at least one verified Q4 tag is the documented default for a 7B chat model
 
 ---
 

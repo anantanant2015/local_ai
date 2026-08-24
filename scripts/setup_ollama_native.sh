@@ -23,9 +23,9 @@ bash "$SCRIPT_DIR/start_ollama_native.sh"
 show_model_menu_native
 
 echo -e "${YELLOW}Recommendation for 16GB RAM:${NC}"
-echo -e "  - qwen2.5-coder:7b for chat/code generation"
-echo -e "  - tinyllama:latest for autocomplete (fastest, lowest RAM)"
-echo -e "  - qwen2.5-coder:3b or phi3:mini for higher-quality autocomplete"
+echo -e "  - qwen2.5-coder:7b-instruct-q4_K_M for chat/code generation"
+echo -e "  - tinyllama:1.1b-chat-v1-q4_K_M for autocomplete (fastest, lowest RAM)"
+echo -e "  - qwen2.5-coder:3b-instruct-q4_K_M or phi3 mini Q4_K_M for higher-quality autocomplete"
 echo ""
 
 read -p "Select models to install (e.g., '7 8' or '1'): " choices
@@ -48,13 +48,17 @@ for choice in $choices; do
 done
 
 if [ ${#SELECTED_MODELS[@]} -eq 0 ]; then
-  echo -e "${YELLOW}No models selected. Using default: TinyLlama${NC}"
-  SELECTED_MODELS=("tinyllama:latest|TinyLlama 1.1B")
+  echo -e "${YELLOW}No models selected. Using default: TinyLlama Q4_K_M${NC}"
+  SELECTED_MODELS=("tinyllama:1.1b-chat-v1-q4_K_M|TinyLlama 1.1B")
 fi
 
 echo -e "\n${CYAN}📥 Downloading selected models...${NC}"
 for model_info in "${SELECTED_MODELS[@]}"; do
   IFS='|' read -r tag name <<< "$model_info"
+  MEMORY_REQ="$(get_model_field_by_tag "$tag" "memoryRequired")"
+  if ! assert_memory_available "${MEMORY_REQ:-0 GB}" native "$name"; then
+    continue
+  fi
   if ! is_model_installed_native "$tag"; then
     pull_model_native "$tag" "$name"
   else
@@ -73,7 +77,7 @@ done
 
 for model_info in "${SELECTED_MODELS[@]}"; do
   IFS='|' read -r tag _ <<< "$model_info"
-  if [ "$tag" = "tinyllama:latest" ]; then
+  if [[ "$tag" == tinyllama:* ]]; then
     AUTOCOMPLETE_MODEL="$tag"
     break
   fi
@@ -82,7 +86,7 @@ done
 if [ -z "$AUTOCOMPLETE_MODEL" ]; then
   for model_info in "${SELECTED_MODELS[@]}"; do
     IFS='|' read -r tag _ <<< "$model_info"
-  if [[ "$tag" == *"3b"* ]] || [[ "$tag" == *"mini"* ]] || [[ "$tag" == "phi:latest" ]]; then
+  if [[ "$tag" == *"3b"* ]] || [[ "$tag" == *"mini"* ]] || [[ "$tag" == phi:* ]]; then
     AUTOCOMPLETE_MODEL="$tag"
     break
   fi

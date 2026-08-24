@@ -175,20 +175,24 @@ No server management needed—everything is local Docker.
 
 ## Available Models
 
-| Model | Size | Memory | Best For |
-|-------|------|--------|----------|
-| **Phi-2** | 1.6 GB | 2.5 GB | Autocomplete, fast responses |
-| **TinyLlama 1.1B** | 637 MB | 1.5 GB | Very low-memory testing and quick prompts |
-| **Mistral 7B** | 4.4 GB | 5.0 GB | Complex reasoning, code generation |
-| **CodeLlama 7B** | 3.8 GB | 4.5 GB | Code-specific tasks |
-| **Llama2 7B** | 3.8 GB | 4.5 GB | General conversation |
-| **Neural Chat 7B** | 4.1 GB | 4.8 GB | Dialogue optimization |
-| **Orca Mini 3B** | 1.9 GB | 3.0 GB | Lightweight alternative |
-| **Qwen 2.5 Coder 7B** | 4.7 GB | 6.0 GB | Strong coding and reasoning |
-| **Qwen 2.5 Coder 3B** | 2.0 GB | 3.2 GB | Fast coding on 16GB systems |
-| **Phi-3 Mini** | 2.2 GB | 3.5 GB | Efficient coding/general usage |
-| **DeepSeek Coder 6.7B** | 3.8 GB | 5.5 GB | Code generation and edits |
-| **StarCoder2 7B** | 4.1 GB | 5.8 GB | Open code-assistant model |
+Catalog tags **name the GGUF quant we request** (usually Q4_K_M). Ollama may still alias tags internally. Unnamed `:latest` is not the performance target.
+
+Docker `mem_limit: 4g` will refuse 7B Q4 pulls (they need ~5.5–6 GB). Use native mode or a smaller Q4 model.
+
+| Model | Quant | Size | Memory | Best For |
+|-------|-------|------|--------|----------|
+| **Phi-2** | Q4_K_M | 1.8 GB | 3.0 GB | Autocomplete, fast responses |
+| **TinyLlama 1.1B** | Q4_K_M | 669 MB | 1.5 GB | Very low-memory testing and quick prompts |
+| **Mistral 7B** | Q4_K_M | 4.4 GB | 5.5 GB | Complex reasoning, code generation |
+| **CodeLlama 7B** | Q4_K_M | 4.1 GB | 5.5 GB | Code-specific tasks |
+| **Llama2 7B** | Q4_K_M | 4.1 GB | 5.5 GB | General conversation |
+| **Neural Chat 7B** | Q4_K_M | 4.4 GB | 5.5 GB | Dialogue optimization |
+| **Orca Mini 3B** | Q4_0 | 2.0 GB | 3.0 GB | Lightweight alternative (no Q4_K_M 3B tag) |
+| **Qwen 2.5 Coder 7B** | Q4_K_M | 4.7 GB | 6.0 GB | Strong coding and reasoning |
+| **Qwen 2.5 Coder 3B** | Q4_K_M | 1.9 GB | 3.2 GB | Fast coding on 16GB systems |
+| **Phi-3 Mini** | Q4_K_M | 2.4 GB | 3.5 GB | Efficient coding/general usage |
+| **DeepSeek Coder 6.7B** | Q4_K_M | 4.1 GB | 5.5 GB | Code generation and edits |
+| **StarCoder2 7B** | Q4_K_M | 4.4 GB | 5.8 GB | Open code-assistant model |
 
 ## Configuration
 

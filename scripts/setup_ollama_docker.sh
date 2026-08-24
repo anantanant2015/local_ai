@@ -110,14 +110,18 @@ for choice in $choices; do
 done
 
 if [ ${#SELECTED_MODELS[@]} -eq 0 ]; then
-  echo -e "${YELLOW}No models selected. Using default: TinyLlama${NC}"
-  SELECTED_MODELS=("tinyllama:latest|TinyLlama 1.1B")
+  echo -e "${YELLOW}No models selected. Using default: TinyLlama Q4_K_M${NC}"
+  SELECTED_MODELS=("tinyllama:1.1b-chat-v1-q4_K_M|TinyLlama 1.1B")
 fi
 
 # Download selected models
 echo -e "\n${CYAN}📥 Downloading selected models...${NC}"
 for model_info in "${SELECTED_MODELS[@]}"; do
   IFS='|' read -r tag name <<< "$model_info"
+  MEMORY_REQ="$(get_model_field_by_tag "$tag" "memoryRequired")"
+  if ! assert_memory_available "${MEMORY_REQ:-0 GB}" docker "$name"; then
+    continue
+  fi
   if ! is_model_installed "$tag"; then
     pull_model "$tag" "$name"
   else
@@ -134,7 +138,7 @@ MODELS_CSV=""
 
 for model_info in "${SELECTED_MODELS[@]}"; do
   IFS='|' read -r tag _ <<< "$model_info"
-  if [ "$tag" = "tinyllama:latest" ]; then
+  if [[ "$tag" == tinyllama:* ]]; then
     AUTOCOMPLETE_MODEL="$tag"
     break
   fi
