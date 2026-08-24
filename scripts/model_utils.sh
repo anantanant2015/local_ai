@@ -154,7 +154,9 @@ pull_model() {
 
 # Display model selection menu
 show_model_menu() {
-  local installed_models=$(list_installed_models)
+  local lister="${1:-${LIST_INSTALLED_FN:-list_installed_models}}"
+  local installed_models
+  installed_models="$($lister)"
 
   echo -e "\n${CYAN}═══════════════════════════════════════════════════════════${NC}"
   echo -e "${CYAN}                  Available Models                          ${NC}"
@@ -203,4 +205,47 @@ show_model_menu() {
   done
 
   export MODEL_COUNT=$((i-1))
+}
+
+print_continue_from_yaml() {
+  local path="${1:-${CONFIG_FILE:-$HOME/.continue/config.yaml}}"
+  if [ ! -f "$path" ]; then
+    echo -e "${YELLOW}⚠️  No Continue config found at $path${NC}"
+    return
+  fi
+
+  python3 - "$path" <<'PY'
+import sys
+path = sys.argv[1]
+chat = None
+auto = None
+in_models = False
+in_auto = False
+with open(path, encoding="utf-8") as fh:
+    for raw in fh:
+        line = raw.strip()
+        if line == "models:":
+            in_models = True
+            in_auto = False
+            continue
+        if line.startswith("tabAutocompleteModel:"):
+            in_auto = True
+            in_models = False
+            continue
+        if in_models and chat is None and line.startswith("model:"):
+            chat = line.split(":", 1)[1].strip()
+        elif in_auto and auto is None and line.startswith("model:"):
+            auto = line.split(":", 1)[1].strip()
+print(chat or "none")
+print(auto or "none")
+PY
+}
+
+smoke_models() {
+  local chat="$1"
+  local auto="${2:-$1}"
+  bash "$SCRIPT_DIR/smoke_ollama.sh" "$chat"
+  if [ "$auto" != "$chat" ]; then
+    bash "$SCRIPT_DIR/smoke_ollama.sh" "$auto"
+  fi
 }

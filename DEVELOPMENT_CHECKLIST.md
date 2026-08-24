@@ -29,7 +29,7 @@ Phase 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. Do not start N+1 until N exit
 | 5 | Fix list-models / YAML | P1 | ✅ DONE | 5 | 0.5 day |
 | 6 | Stop daemon.json smash | P1 | ✅ DONE | 5 | 0.5 day |
 | 7 | Spec, docs track, honest CI | P2 | ✅ DONE | 7 | 0.5 day |
-| 8 | Collapse native/Docker dup | P2 | ⚪ TODO | 6 | 1.5 days |
+| 8 | Collapse native/Docker dup | P2 | ✅ DONE | 6 | 1.5 days |
 
 ## GLOBAL AGENT RULES
 
@@ -353,7 +353,7 @@ Phase 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. Do not start N+1 until N exit
 
 ## Phase 8: Collapse native/Docker dup (P2)
 
-**Status:** ⚪ TODO  
+**Status:** ✅ DONE  
 **Goal:** One shared helper for catalog parse, menus, Continue generate, smoke; thin native vs docker wrappers.  
 **Prerequisites:** Phases 1–5 (behavior frozen)  
 **Estimated effort:** 1.5 days
@@ -376,14 +376,14 @@ Phase 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. Do not start N+1 until N exit
 
 ### 8.1 — Extract
 
-- [ ] **8.1.1** Shared JSON/menu/RAM-gate/smoke/continue-call helpers
-- [ ] **8.1.2** Docker and native scripts become thin; `bash -n` all scripts
-- [ ] **8.1.3** `make help` still documents both paths
+- [x] **8.1.1** Shared JSON/menu/RAM-gate/smoke/continue-call helpers
+- [x] **8.1.2** Docker and native scripts become thin; `bash -n` all scripts
+- [x] **8.1.3** `make help` still documents both paths
 
 ### 8.2 — Exit
 
-- [ ] **8.2.1** Regression matrix commands pass
-- [ ] **8.2.2** Mark Phase 8 complete; honesty: two runtimes remain, only code dup is gone
+- [x] **8.2.1** Regression matrix commands pass
+- [x] **8.2.2** Mark Phase 8 complete; honesty: two runtimes remain, only code dup is gone
 
 ---
 
