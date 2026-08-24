@@ -15,26 +15,6 @@ install_ollama_if_missing() {
   echo -e "${GREEN}✅ Ollama installed${NC}"
 }
 
-build_selected_models_json() {
-  local models_json="["
-  local first=true
-
-  for model_info in "${SELECTED_MODELS[@]}"; do
-    IFS='|' read -r tag name <<< "$model_info"
-
-    if [ "$first" = true ]; then
-      first=false
-    else
-      models_json+="," 
-    fi
-
-    models_json+="\n    {\n      \"title\": \"$name\",\n      \"provider\": \"ollama\",\n      \"model\": \"$tag\",\n      \"apiBase\": \"http://localhost:11434\"\n    }"
-  done
-
-  models_json+="\n  ]"
-  echo "$models_json"
-}
-
 echo -e "${CYAN}🚀 Native Ollama Setup (Non-Docker)${NC}\n"
 
 install_ollama_if_missing
@@ -43,8 +23,9 @@ bash "$SCRIPT_DIR/start_ollama_native.sh"
 show_model_menu_native
 
 echo -e "${YELLOW}Recommendation for 16GB RAM:${NC}"
-echo -e "  - qwen2.5-coder:7b for chat/code generation"
-echo -e "  - qwen2.5-coder:3b or phi3:mini for autocomplete"
+echo -e "  - qwen2.5-coder:7b-instruct-q4_K_M for chat/code generation"
+echo -e "  - tinyllama:1.1b-chat-v1-q4_K_M for autocomplete (fastest, lowest RAM)"
+echo -e "  - qwen2.5-coder:3b-instruct-q4_K_M or phi3 mini Q4_K_M for higher-quality autocomplete"
 echo ""
 
 read -p "Select models to install (e.g., '7 8' or '1'): " choices
@@ -67,13 +48,17 @@ for choice in $choices; do
 done
 
 if [ ${#SELECTED_MODELS[@]} -eq 0 ]; then
-  echo -e "${YELLOW}No models selected. Using default: qwen2.5-coder:3b${NC}"
-  SELECTED_MODELS=("qwen2.5-coder:3b|Qwen 2.5 Coder 3B")
+  echo -e "${YELLOW}No models selected. Using default: TinyLlama Q4_K_M${NC}"
+  SELECTED_MODELS=("tinyllama:1.1b-chat-v1-q4_K_M|TinyLlama 1.1B")
 fi
 
 echo -e "\n${CYAN}📥 Downloading selected models...${NC}"
 for model_info in "${SELECTED_MODELS[@]}"; do
   IFS='|' read -r tag name <<< "$model_info"
+  MEMORY_REQ="$(get_model_field_by_tag "$tag" "memoryRequired")"
+  if ! assert_memory_available "${MEMORY_REQ:-0 GB}" native "$name"; then
+    continue
+  fi
   if ! is_model_installed_native "$tag"; then
     pull_model_native "$tag" "$name"
   else
@@ -81,7 +66,6 @@ for model_info in "${SELECTED_MODELS[@]}"; do
   fi
 done
 
-MODELS_ARRAY="$(build_selected_models_json)"
 CHAT_MODEL=""
 AUTOCOMPLETE_MODEL=""
 
@@ -93,18 +77,35 @@ done
 
 for model_info in "${SELECTED_MODELS[@]}"; do
   IFS='|' read -r tag _ <<< "$model_info"
-  if [[ "$tag" == *"3b"* ]] || [[ "$tag" == *"mini"* ]] || [[ "$tag" == "phi:latest" ]]; then
+  if [[ "$tag" == tinyllama:* ]]; then
     AUTOCOMPLETE_MODEL="$tag"
     break
   fi
 done
 
 if [ -z "$AUTOCOMPLETE_MODEL" ]; then
+  for model_info in "${SELECTED_MODELS[@]}"; do
+    IFS='|' read -r tag _ <<< "$model_info"
+  if [[ "$tag" == *"3b"* ]] || [[ "$tag" == *"mini"* ]] || [[ "$tag" == phi:* ]]; then
+    AUTOCOMPLETE_MODEL="$tag"
+    break
+  fi
+done
+fi
+
+if [ -z "$AUTOCOMPLETE_MODEL" ]; then
   AUTOCOMPLETE_MODEL="$CHAT_MODEL"
 fi
 
-update_continue_config_native "$CHAT_MODEL" "$AUTOCOMPLETE_MODEL" "$MODELS_ARRAY"
+MODELS_CSV=""
+for model_info in "${SELECTED_MODELS[@]}"; do
+  IFS='|' read -r tag _ <<< "$model_info"
+  [ -z "$MODELS_CSV" ] && MODELS_CSV="$tag" || MODELS_CSV="$MODELS_CSV,$tag"
+done
+
+bash "$SCRIPT_DIR/generate_continue_config.sh" --mode native --models "$MODELS_CSV" --chat "$CHAT_MODEL" --autocomplete "$AUTOCOMPLETE_MODEL"
 
 echo -e "\n${GREEN}✅ Native setup complete!${NC}"
+echo -e "${CYAN}Install Continue (Continue.continue) in VS Code and/or Cursor, then reload.${NC}"
 echo -e "${CYAN}Start: bash scripts/start_ollama_native.sh${NC}"
 echo -e "${CYAN}Stop:  bash scripts/stop_ollama_native.sh${NC}"

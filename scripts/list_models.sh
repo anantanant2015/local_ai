@@ -5,6 +5,9 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/model_utils.sh"
 
+CONFIG_FILE="${HOME}/.continue/config.yaml"
+# Fixture check: generate_continue_config.sh --output /tmp/cfg.yaml then print_continue_from_yaml first two lines are chat and autocomplete tags.
+
 echo -e "${CYAN}🤖 Ollama Models Overview${NC}\n"
 
 # Check prerequisites
@@ -23,18 +26,12 @@ echo -e "${CYAN}              Currently Configured in Continue             ${NC}
 echo -e "${CYAN}═══════════════════════════════════════════════════════════${NC}\n"
 
 if [ -f "$CONFIG_FILE" ]; then
-  if command -v jq &> /dev/null; then
-    CHAT_MODELS=$(jq -r '.models[].model' "$CONFIG_FILE" 2>/dev/null | tr '\n' ', ' | sed 's/,$//')
-    AUTO_MODEL=$(jq -r '.tabAutocompleteModel.model' "$CONFIG_FILE" 2>/dev/null)
-    
-    echo -e "${GREEN}Chat models:${NC} $CHAT_MODELS"
-    echo -e "${GREEN}Autocomplete:${NC} $AUTO_MODEL"
-  else
-    echo -e "${YELLOW}Install 'jq' to see configured models${NC}"
-    echo -e "Config file: $CONFIG_FILE"
-  fi
+  mapfile -t CONTINUE_TAGS < <(print_continue_from_yaml "$CONFIG_FILE")
+  echo -e "${GREEN}Chat models:${NC} ${CONTINUE_TAGS[0]:-none}"
+  echo -e "${GREEN}Autocomplete:${NC} ${CONTINUE_TAGS[1]:-none}"
 else
   echo -e "${YELLOW}⚠️  No Continue config found${NC}"
+  echo -e "Config file: $CONFIG_FILE"
 fi
 
 # Show Docker memory info

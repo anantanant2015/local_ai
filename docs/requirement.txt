@@ -1,0 +1,32 @@
+# Requirement
+
+## Product
+- Name: local_ai
+- One-sentence goal: Run freely available quantized Ollama models on this machine and connect them to Cursor and VS Code through Continue.
+- Primary users: a single operator on a local Linux/Mac/Windows host
+
+## In scope
+1. Serve local LLMs from free Ollama-library GGUF quants (explicit Q4_K_M / Q4_0 tags, RAM-gated).
+2. Native `ollama serve` and Docker Ollama on loopback `127.0.0.1:11434`.
+3. Generate `~/.continue/config.yaml` for the Continue extension in VS Code and Cursor.
+
+## Out of scope
+1. Cloud LLM APIs, paid providers, or a second inference stack (vLLM, raw llama.cpp server, LM Studio, Open WebUI).
+2. Multi-user auth, tenancy, SMTP, invite tokens, or a product web UI.
+3. Pulling large models on GitHub-hosted CI runners.
+
+## Data / schema
+- Sources of truth: `scripts/models.json` (catalog), Ollama weight store (`~/.ollama` or volume `ollama-models`), `~/.continue/config.yaml`.
+- Key entities: model key, `ollamaTag`, `quantization`, `memoryRequired`.
+
+## Auth & access
+- None. Bind address is the only control (loopback). No roles or tokens.
+
+## Environments
+- Local: make setup / setup-native
+- Required env vars: none for the default path (`OLLAMA_HOST=127.0.0.1:11434` on native systemd)
+
+## Acceptance
+- Happy path: quantized tiny model answers `curl` `/api/generate` on loopback; Continue YAML lists that model first for chat.
+- Editors: Continue (`Continue.continue`) in VS Code and Cursor using the same YAML.
+- Tests required: `bash -n scripts/*.sh`, `python3 -m json.tool scripts/models.json`, `docker compose config`, local `make smoke MODEL=<tag>` (not on GH runners for 7B).

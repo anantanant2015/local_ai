@@ -46,6 +46,9 @@ if is_model_installed_native "$OLLAMA_TAG"; then
 fi
 
 echo -e "\n${BLUE}ℹ️  Model requires: $MEMORY_REQ${NC}"
+if ! assert_memory_available "$MEMORY_REQ" native "$DISPLAY_NAME"; then
+  exit 1
+fi
 read -p "Continue with download? (Y/n): " confirm
 if [[ "$confirm" =~ ^[Nn]$ ]]; then
   echo "Download cancelled"

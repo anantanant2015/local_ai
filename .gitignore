@@ -1,6 +1,10 @@
-# Development & Documentation (should not be committed)
+# Development notes (untracked copies; spec lives in docs/requirement.txt)
 instructions.md
-docs/
+docs/*
+!docs/requirement.txt
+!docs/DEVELOPMENT_CHECKLIST.md
+!docs/images/
+!docs/images/**
 
 # Environment
 .env

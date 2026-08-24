@@ -1,9 +1,9 @@
-.PHONY: help setup start stop clean logs list-models add-model switch setup-native start-native stop-native enable-autostart-ubuntu disable-autostart-ubuntu list-models-native add-model-native switch-native
+.PHONY: help setup start stop clean logs list-models add-model switch setup-native start-native stop-native enable-autostart-ubuntu disable-autostart-ubuntu list-models-native add-model-native switch-native unload-models-native generate-continue-config-native generate-continue-config smoke smoke-native ci
 
 help:
 	@echo "📋 Local AI Agent - Available Commands"
 	@echo ""
-	@echo "  make setup        - Interactive setup: configure Docker daemon + docker-compose"
+	@echo "  make setup        - Interactive setup: docker compose + models + Continue"
 	@echo "  make start        - Start Ollama container with persistent configuration"
 	@echo "  make stop         - Stop Ollama container"
 	@echo "  make logs         - Show recent container logs"
@@ -21,10 +21,15 @@ help:
 	@echo "  make list-models-native - View available models/status for native Ollama"
 	@echo "  make add-model-native   - Download additional models for native Ollama"
 	@echo "  make switch-native      - Switch native chat/autocomplete models"
+	@echo "  make generate-continue-config-native - Interactive Continue config generator (native)"
+	@echo "  make generate-continue-config        - Interactive Continue config generator (docker)"
+	@echo "  make unload-models-native - Unload currently loaded native Ollama models from RAM"
+	@echo "  make smoke          - POST /api/generate smoke (MODEL=tag required)"
+	@echo "  make smoke-native   - Same smoke against native loopback Ollama"
+	@echo "  make ci             - Local syntax checks (compose, bash -n, JSON, make help)"
 	@echo ""
 	@echo "🔧 Configuration:"
-	@echo "  - Docker daemon: /etc/docker/daemon.json (4GB memory + 6GB swap)"
-	@echo "  - Docker Compose: ./docker-compose.yml (persistent setup)"
+	@echo "  - Docker Compose: ./docker-compose.yml (container mem_limit 4g, loopback :11434)"
 	@echo "  - Continue config: ~/.continue/config.yaml"
 
 setup:
@@ -76,5 +81,27 @@ add-model-native:
 
 switch-native:
 	@bash scripts/switch_model_native.sh
+
+unload-models-native:
+	@bash scripts/unload_models_native.sh
+
+generate-continue-config-native:
+	@bash scripts/generate_continue_config.sh --mode native
+
+generate-continue-config:
+	@bash scripts/generate_continue_config.sh --mode docker
+
+smoke:
+	@bash scripts/smoke_ollama.sh "$(MODEL)"
+
+smoke-native:
+	@bash scripts/smoke_ollama.sh "$(MODEL)"
+
+ci:
+	docker compose config -q
+	@for script in scripts/*.sh; do bash -n "$$script"; done
+	python3 -m json.tool scripts/models.json > /dev/null
+	python3 -m json.tool continue_config.json > /dev/null
+	@$(MAKE) help > /dev/null
 
 .DEFAULT_GOAL := help

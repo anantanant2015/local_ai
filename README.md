@@ -15,7 +15,6 @@ All setup tasks completed:
 - [x] Support for multiple models (Phi, Mistral, CodeLlama, etc.)
 - [x] Memory-aware model recommendations
 - [x] Persistent docker-compose configuration
-- [x] Docker daemon memory optimization (4GB initial + 6GB swap)
 - [x] CI/CD pipeline with GitHub Actions
 
 ## Quick Start
@@ -60,11 +59,7 @@ make disable-autostart-ubuntu
 
 ### Memory Configuration
 
-The setup automatically configures Docker for optimal resource usage:
-- **Initial memory**: 4 GB (efficient for daily use)
-- **Swap memory**: 6 GB (used only when needed)
-- **Total limit**: 10 GB max
-- **Config location**: `/etc/docker/daemon.json` (auto-configured during setup)
+Docker **container** limits live in `docker-compose.yml` (`mem_limit: 4g`). Setup does **not** write `/etc/docker/daemon.json`. Swap is thrash, not speed.
 
 ### Setup (One-time)
 
@@ -73,20 +68,18 @@ make setup
 ```
 
 **Interactive Setup Process:**
-1. Configures Docker daemon (`/etc/docker/daemon.json`): 4GB memory + 6GB swap
-2. Pulls Ollama Docker image
-3. Creates and starts container with `docker-compose`
-4. Shows available models with specs (size, memory, quality)
-5. Lets you choose which models to download
-6. Configures Continue automatically for `/home/<user>/.continue/config.yaml`
+1. Pulls Ollama Docker image
+2. Creates and starts container with `docker-compose`
+3. Shows available models with specs (size, memory, quant, quality)
+4. Lets you choose which models to download (RAM gate may refuse 7B under 4g)
+5. Configures Continue automatically for `~/.continue/config.yaml`
 
 **What's configured automatically:**
-- ✅ Docker daemon memory limits
-- ✅ Persistent `docker-compose.yml` for auto-restart
-- ✅ Continue extension config with Phi-2 for autocomplete
-- ✅ Swap memory as fallback
+- Persistent `docker-compose.yml` for auto-restart
+- Continue YAML at `~/.continue/config.yaml`
+- Container `mem_limit: 4g` (not host `/etc/docker/daemon.json`)
 
-**Default recommendation:** Start with Phi (1.6GB, fast) for autocomplete
+**Default recommendation:** Start with TinyLlama Q4_K_M for autocomplete
 
 **⏱️ First-time setup:** 5–30 minutes depending on models selected and internet speed
 
@@ -103,22 +96,28 @@ curl http://localhost:11434
 
 Expected response: HTTP header with version info.
 
-## Configure Continue in VS Code
+## Configure Continue in VS Code and Cursor
 
-The setup script automatically configures Continue. To verify or manually set it up:
+Setup writes `~/.continue/config.yaml` (Ollama provider, `apiBase: http://127.0.0.1:11434`). The **first** model in `models:` is the default chat model. `continue_config.json` in this repo is legacy and unused.
 
-1. **Install Continue extension** in VS Code Marketplace
-2. **Config location**: `~/.continue/config.yaml` (created automatically)
-3. **Available models** in Continue:
-   - **Phi-2 Local** — Fast autocomplete (default)
-   - **Mistral Local** — Better reasoning & code generation
-4. **Select Phi-2 Local** from Continue model dropdown:
-   - Open Continue panel (left sidebar or `Ctrl+L`)
-   - Click model selector at bottom
-   - Choose "Phi-2 Local"
-5. **Reload VS Code** if config doesn't load
+**Supported path: Continue extension** (`Continue.continue`) in both editors.
 
-The extension will connect to `http://localhost:11434` automatically.
+### VS Code
+
+1. Install **Continue** from the VS Code Marketplace (`Continue.continue`)
+2. Config: `~/.continue/config.yaml` (created by `make setup` / `make setup-native` / switch)
+3. Open Continue (`Ctrl+L` / `Cmd+L`), pick the chat model from the dropdown
+4. Reload the window if the config does not load
+
+### Cursor
+
+1. Extensions → install **Continue** (`Continue.continue`) — same YAML as VS Code
+2. Reload Cursor
+3. Open Continue and pick the local Ollama model
+
+**Optional (not the supported path):** Cursor Settings → Models → add Ollama at `http://127.0.0.1:11434`. Prefer Continue so chat and tab-complete stay in one config.
+
+The extension talks to `http://127.0.0.1:11434`.
 
 ## Usage Commands
 
@@ -150,9 +149,12 @@ The extension will connect to `http://localhost:11434` automatically.
 | `make list-models` | View available models and installation status |
 | `make add-model` | Download additional models interactively |
 | `make switch` | Switch active chat and autocomplete models |
+| `make generate-continue-config` | Interactive Continue config generator (Docker models) |
 | `make list-models-native` | View available models and status for native Ollama |
 | `make add-model-native` | Download additional models using native Ollama |
 | `make switch-native` | Switch active chat and autocomplete models for native Ollama |
+| `make generate-continue-config-native` | Interactive Continue config generator (native models) |
+| `make unload-models-native` | Unload currently loaded native models from RAM immediately |
 
 The `local_ai_agent/` directory is **completely self-contained**:
 is repository is **completely self-contained**:
@@ -167,24 +169,29 @@ No server management needed—everything is local Docker.
 - **Container**: Ollama (official Docker image)
 - **Models**: Multiple supported (Phi-2, Mistral, CodeLlama, Llama2, etc.)
 - **Storage**: Docker volume `ollama-models` (persists across restarts)
-- **Port**: 11434 (local only, not exposed to network)
+- **Port**: `127.0.0.1:11434` (loopback only; not published on LAN)
 - **API**: OpenAI-compatible REST API
 
 ## Available Models
 
-| Model | Size | Memory | Best For |
-|-------|------|--------|----------|
-| **Phi-2** | 1.6 GB | 2.5 GB | Autocomplete, fast responses |
-| **Mistral 7B** | 4.4 GB | 5.0 GB | Complex reasoning, code generation |
-| **CodeLlama 7B** | 3.8 GB | 4.5 GB | Code-specific tasks |
-| **Llama2 7B** | 3.8 GB | 4.5 GB | General conversation |
-| **Neural Chat 7B** | 4.1 GB | 4.8 GB | Dialogue optimization |
-| **Orca Mini 3B** | 1.9 GB | 3.0 GB | Lightweight alternative |
-| **Qwen 2.5 Coder 7B** | 4.7 GB | 6.0 GB | Strong coding and reasoning |
-| **Qwen 2.5 Coder 3B** | 2.0 GB | 3.2 GB | Fast coding on 16GB systems |
-| **Phi-3 Mini** | 2.2 GB | 3.5 GB | Efficient coding/general usage |
-| **DeepSeek Coder 6.7B** | 3.8 GB | 5.5 GB | Code generation and edits |
-| **StarCoder2 7B** | 4.1 GB | 5.8 GB | Open code-assistant model |
+Catalog tags **name the GGUF quant we request** (usually Q4_K_M). Ollama may still alias tags internally. Unnamed `:latest` is not the performance target.
+
+Docker `mem_limit: 4g` will refuse 7B Q4 pulls (they need ~5.5–6 GB). Use native mode or a smaller Q4 model.
+
+| Model | Quant | Size | Memory | Best For |
+|-------|-------|------|--------|----------|
+| **Phi-2** | Q4_K_M | 1.8 GB | 3.0 GB | Autocomplete, fast responses |
+| **TinyLlama 1.1B** | Q4_K_M | 669 MB | 1.5 GB | Very low-memory testing and quick prompts |
+| **Mistral 7B** | Q4_K_M | 4.4 GB | 5.5 GB | Complex reasoning, code generation |
+| **CodeLlama 7B** | Q4_K_M | 4.1 GB | 5.5 GB | Code-specific tasks |
+| **Llama2 7B** | Q4_K_M | 4.1 GB | 5.5 GB | General conversation |
+| **Neural Chat 7B** | Q4_K_M | 4.4 GB | 5.5 GB | Dialogue optimization |
+| **Orca Mini 3B** | Q4_0 | 2.0 GB | 3.0 GB | Lightweight alternative (no Q4_K_M 3B tag) |
+| **Qwen 2.5 Coder 7B** | Q4_K_M | 4.7 GB | 6.0 GB | Strong coding and reasoning |
+| **Qwen 2.5 Coder 3B** | Q4_K_M | 1.9 GB | 3.2 GB | Fast coding on 16GB systems |
+| **Phi-3 Mini** | Q4_K_M | 2.4 GB | 3.5 GB | Efficient coding/general usage |
+| **DeepSeek Coder 6.7B** | Q4_K_M | 4.1 GB | 5.5 GB | Code generation and edits |
+| **StarCoder2 7B** | Q4_K_M | 4.4 GB | 5.8 GB | Open code-assistant model |
 
 ## Configuration
 
@@ -192,11 +199,12 @@ No server management needed—everything is local Docker.
 
 The `docker-compose.yml` provides persistent configuration:
 - **Container name**: ollama-server
-- **Memory limit**: 4 GB (physical)
-- **Swap limit**: 10 GB total (6 GB swap)
-- **Port**: 11434 (localhost only)
+- **Memory limit**: 4 GB physical (`mem_limit: 4g`). 7B Q4 models are blocked; use native mode.
+- **Swap limit**: 10 GB total (`memswap_limit: 10g`). Swap is thrash, not a speed feature.
+- **Port**: `127.0.0.1:11434:11434` (loopback only)
 - **Restart policy**: always (auto-recovery)
 - **Volume**: ollama-models (model persistence)
+- **GPU**: unset (CPU inference unless you add a device mapping yourself)
 
 Start with compose:
 ```bash
@@ -205,27 +213,17 @@ make start
 
 ### Memory Optimization
 
-The setup configures two levels of memory management:
+Memory is capped on the **container** only (`docker-compose.yml`). Setup never writes `/etc/docker/daemon.json`.
 
-**1. Docker Daemon** (`/etc/docker/daemon.json`):
-```json
-{
-  "memory": 4294967296,
-  "memswap": 10737418240
-}
-```
-
-**2. Container** (`docker-compose.yml`):
 ```yaml
 mem_limit: 4g
 memswap_limit: 10g
 ```
 
 **How it works:**
-- Initial allocation: 4 GB (sufficient for Phi-2)
-- Swap kicks in: Only when demand exceeds 4 GB
-- Physical memory protected: Never uses more than 10 GB total
-- Performance: Stays fast for most tasks
+- Container cap: 4 GB (enough for TinyLlama / Phi / Phi-3 Q4)
+- 7B Q4 needs ~5.5–6 GB — Docker setup refuses those pulls
+- `memswap_limit: 10g` is a safety ceiling; hitting swap means thrash, not faster inference
 
 ### Continue Extension Config
 
@@ -236,12 +234,36 @@ Models configured automatically:
 - **Autocomplete model**: Phi-2 Local (fast, lightweight)
 - **API endpoint**: http://localhost:11434
 
+### Native Memory Control (Ollama)
+
+If RAM stays high after running prompts, note that Ollama keeps recently used models loaded briefly for faster follow-up responses.
+
+Quick actions:
+
+```bash
+# See loaded models and their RAM footprint
+ollama ps
+
+# Force-unload loaded models (native mode)
+make unload-models-native
+```
+
+Keep-alive tuning (step 3):
+
+- **What it is**: keep-alive controls how long a model remains in RAM after a response.
+- **Lower keep-alive**: less RAM usage, but slower next response (cold reload).
+- **Higher keep-alive**: faster repeated prompts, but more RAM stays used.
+
+Manual one-off example (aggressive unload right after response):
+
+```bash
+curl -sS http://127.0.0.1:11434/api/generate \
+   -d '{"model":"phi3:mini","prompt":"hi","keep_alive":0}'
+```
+
 ## Configuration
 
-The [continue_config.json](continue_config.json) is automatically managed by setup/switch commands. Manual editing is supported for:
-- Advanced model parameters
-- Custom slash commands
-- API configuration
+The [continue_config.json](continue_config.json) is unused legacy JSON. Live config is `~/.continue/config.yaml`.
 
 ## Troubleshooting
 
@@ -271,8 +293,8 @@ Ensure sufficient disk space and stable internet. Model files go to Docker volum
 
 ## Files
 
-- `docker-compose.yml` — Persistent container configuration (4GB memory + 6GB swap)
-- `scripts/setup_ollama_docker.sh` — Interactive setup with daemon.json configuration
+- `docker-compose.yml` — Persistent container configuration (4g mem_limit, loopback 11434)
+- `scripts/setup_ollama_docker.sh` — Interactive Docker setup (does not write daemon.json)
 - `scripts/start_dev_environment.sh` — Start container using docker-compose
 - `scripts/add_model.sh` — Download additional models
 - `scripts/switch_model.sh` — Switch active models

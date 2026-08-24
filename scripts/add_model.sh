@@ -53,6 +53,9 @@ fi
 
 # Check Docker memory
 echo -e "\n${BLUE}ℹ️  Model requires: $MEMORY_REQ${NC}"
+if ! assert_memory_available "$MEMORY_REQ" docker "$DISPLAY_NAME"; then
+  exit 1
+fi
 echo -e "${BLUE}ℹ️  Run 'docker stats --no-stream ollama-server' to check available memory${NC}\n"
 
 read -p "Continue with download? (Y/n): " confirm

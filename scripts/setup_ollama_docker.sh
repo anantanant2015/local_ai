@@ -10,34 +10,6 @@ echo -e "${CYAN}🚀 Interactive Ollama Setup${NC}\n"
 # Check if Docker is running
 check_docker
 
-# Configure Docker daemon for optimal memory usage
-echo -e "${BLUE}🔧 Configuring Docker daemon for optimal memory...${NC}"
-DAEMON_JSON="/etc/docker/daemon.json"
-if [ ! -f "$DAEMON_JSON" ]; then
-  sudo bash -c 'echo "{}" > '"$DAEMON_JSON"
-fi
-
-# Check if memory is already configured
-if ! sudo grep -q '"memory"' "$DAEMON_JSON"; then
-  echo -e "${YELLOW}Setting up Docker daemon memory configuration...${NC}"
-  sudo tee "$DAEMON_JSON" > /dev/null <<EOF
-{
-  "memory": 4294967296,
-  "memswap": 10737418240,
-  "log-driver": "json-file",
-  "log-opts": {
-    "max-size": "10m",
-    "max-file": "3"
-  }
-}
-EOF
-  echo -e "${GREEN}✅ Docker daemon configured: 4GB memory + 6GB swap${NC}"
-  echo -e "${YELLOW}⚠️  Note: Restart Docker for changes to take effect${NC}"
-  echo -e "${BLUE}   Run: sudo systemctl restart docker${NC}\n"
-else
-  echo -e "${GREEN}✅ Docker daemon already configured${NC}\n"
-fi
-
 # Pull Ollama image
 echo -e "${BLUE}📥 Pulling Ollama image...${NC}"
 docker pull ollama/ollama:latest
@@ -86,10 +58,10 @@ echo -e "${CYAN}═════════════════════�
 show_model_menu
 
 echo -e "${CYAN}═══════════════════════════════════════════════════════════${NC}\n"
-echo -e "${YELLOW}Recommendation: Start with Phi (fast, lightweight) for autocomplete${NC}"
-echo -e "${YELLOW}                Add Mistral later for better chat quality${NC}\n"
+echo -e "${YELLOW}Recommendation: Start with TinyLlama (fastest, lowest RAM) for autocomplete${NC}"
+echo -e "${YELLOW}                Add Mistral or Qwen later for stronger chat quality${NC}\n"
 
-read -p "Select models to install (e.g., '1 2' or '1' for Phi only): " choices
+read -p "Select models to install (e.g., '1 2' or '1' for TinyLlama only): " choices
 
 # Parse selections
 declare -a SELECTED_MODELS
@@ -110,14 +82,18 @@ for choice in $choices; do
 done
 
 if [ ${#SELECTED_MODELS[@]} -eq 0 ]; then
-  echo -e "${YELLOW}No models selected. Using default: Phi${NC}"
-  SELECTED_MODELS=("phi:latest|Phi-2")
+  echo -e "${YELLOW}No models selected. Using default: TinyLlama Q4_K_M${NC}"
+  SELECTED_MODELS=("tinyllama:1.1b-chat-v1-q4_K_M|TinyLlama 1.1B")
 fi
 
 # Download selected models
 echo -e "\n${CYAN}📥 Downloading selected models...${NC}"
 for model_info in "${SELECTED_MODELS[@]}"; do
   IFS='|' read -r tag name <<< "$model_info"
+  MEMORY_REQ="$(get_model_field_by_tag "$tag" "memoryRequired")"
+  if ! assert_memory_available "${MEMORY_REQ:-0 GB}" docker "$name"; then
+    continue
+  fi
   if ! is_model_installed "$tag"; then
     pull_model "$tag" "$name"
   else
@@ -128,11 +104,17 @@ done
 # Configure Continue
 echo -e "\n${CYAN}🔧 Configuring Continue extension...${NC}"
 
-# Build models array
-MODELS_ARRAY="["
-FIRST=true
 AUTOCOMPLETE_MODEL=""
 SMALLEST_SIZE=999999
+MODELS_CSV=""
+
+for model_info in "${SELECTED_MODELS[@]}"; do
+  IFS='|' read -r tag _ <<< "$model_info"
+  if [[ "$tag" == tinyllama:* ]]; then
+    AUTOCOMPLETE_MODEL="$tag"
+    break
+  fi
+done
 
 for model_info in "${SELECTED_MODELS[@]}"; do
   IFS='|' read -r tag name <<< "$model_info"
@@ -148,41 +130,26 @@ for model_info in "${SELECTED_MODELS[@]}"; do
 
   SIZE_INT=$(echo "$SIZE_GB * 1000" | bc 2>/dev/null || echo "1000" | cut -d. -f1)
 
-  if [ "$SIZE_INT" -lt "$SMALLEST_SIZE" ]; then
+  if [ -z "$AUTOCOMPLETE_MODEL" ] && [ "$SIZE_INT" -lt "$SMALLEST_SIZE" ]; then
     SMALLEST_SIZE=$SIZE_INT
     AUTOCOMPLETE_MODEL=$tag
   fi
 
-  if [ "$FIRST" = true ]; then
-    FIRST=false
-  else
-    MODELS_ARRAY+=","
-  fi
-
-  MODELS_ARRAY+="
-    {
-      \"title\": \"$name\",
-      \"provider\": \"ollama\",
-      \"model\": \"$tag\",
-      \"apiBase\": \"http://localhost:11434\"
-    }"
+  [ -z "$MODELS_CSV" ] && MODELS_CSV="$tag" || MODELS_CSV="$MODELS_CSV,$tag"
 done
-
-MODELS_ARRAY+="
-  ]"
 
 # Use first selected model as chat model
 IFS='|' read -r CHAT_MODEL _ <<< "${SELECTED_MODELS[0]}"
-update_continue_config "$CHAT_MODEL" "$AUTOCOMPLETE_MODEL" "$MODELS_ARRAY"
+bash "$SCRIPT_DIR/generate_continue_config.sh" --mode docker --models "$MODELS_CSV" --chat "$CHAT_MODEL" --autocomplete "$AUTOCOMPLETE_MODEL"
 
 echo -e "\n${GREEN}✅ Setup complete!${NC}"
 echo -e "\n${CYAN}Next steps:${NC}"
-echo -e "  1. Install Continue VS Code extension (if not already installed)"
-echo -e "  2. Reload VS Code to apply configuration"
-echo -e "  3. Start chatting with your local AI models!"
+echo -e "  1. Install Continue (Continue.continue) in VS Code and/or Cursor"
+echo -e "  2. Reload the editor to load ~/.continue/config.yaml"
+echo -e "  3. Pick the chat model in the Continue dropdown (first listed is default)"
 echo -e "\n${CYAN}Useful commands:${NC}"
 echo -e "  ${GREEN}make list-models${NC} - View all available models"
 echo -e "  ${GREEN}make add-model${NC}   - Download additional models"
 echo -e "  ${GREEN}make switch${NC}      - Switch active models"
 echo -e "  ${GREEN}make stop${NC}        - Stop Ollama container"
-echo -e "\n${BLUE}Ollama API: http://localhost:11434${NC}"
+echo -e "\n${BLUE}Ollama API: http://127.0.0.1:11434${NC}"

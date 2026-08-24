@@ -3,7 +3,7 @@ services:
     image: ollama/ollama:latest
     container_name: ollama-server
     ports:
-      - "11434:11434"
+      - "127.0.0.1:11434:11434"
     volumes:
       - ollama-models:/root/.ollama
     mem_limit: 4g
@@ -12,7 +12,7 @@ services:
     environment:
       - OLLAMA_HOST=0.0.0.0:11434
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:11434"]
+      test: ["CMD", "ollama", "list"]
       interval: 30s
       timeout: 10s
       retries: 3

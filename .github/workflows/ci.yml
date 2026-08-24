@@ -49,7 +49,6 @@ jobs:
         with:
           files: README.md
           config_file: .markdownlint.json
-        continue-on-error: true
 
   test-setup:
     runs-on: ubuntu-latest
@@ -151,17 +150,26 @@ jobs:
     if: always()
 
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Print Summary
+      - name: Fail if a required job failed
+        env:
+          LINT: ${{ needs.lint-and-validate.result }}
+          TEST: ${{ needs.test-setup.result }}
+          DOCS: ${{ needs.documentation.result }}
+          DOCKER: ${{ needs.docker-build.result }}
         run: |
-          echo "================================"
-          echo "✅ CI Pipeline Summary"
-          echo "================================"
-          echo ""
-          echo "✅ Validation: PASSED"
-          echo "✅ Docker Setup: VERIFIED"
-          echo "✅ Documentation: COMPLETE"
-          echo "✅ Scripts: VALIDATED"
-          echo ""
-          echo "Ready for deployment! 🚀"
+          echo "lint-and-validate=$LINT"
+          echo "test-setup=$TEST"
+          echo "documentation=$DOCS"
+          echo "docker-build=$DOCKER"
+          ok=1
+          for r in "$LINT" "$TEST" "$DOCS" "$DOCKER"; do
+            if [ "$r" != "success" ]; then
+              ok=0
+            fi
+          done
+          if [ "$ok" -ne 1 ]; then
+            echo "Required CI jobs did not all succeed."
+            echo "CI is compose/script syntax validation, not a model-serve smoke on GitHub runners."
+            exit 1
+          fi
+          echo "Required jobs succeeded (syntax/docs/image pull only)."
