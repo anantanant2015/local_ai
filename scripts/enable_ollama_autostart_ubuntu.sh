@@ -35,6 +35,7 @@ ExecStart=$OL_PATH serve
 Restart=always
 RestartSec=3
 Environment=HOME=/home/$RUN_USER
+Environment=OLLAMA_HOST=127.0.0.1:11434
 
 [Install]
 WantedBy=multi-user.target

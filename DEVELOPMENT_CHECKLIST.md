@@ -23,7 +23,7 @@ Phase 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. Do not start N+1 until N exit
 | Phase | Name | Priority | Status | Items | Estimate |
 |------:|------|----------|--------|------:|----------|
 | 1 | Quant catalog | P0 | ✅ DONE | 8 | 1 day |
-| 2 | Loopback and memory honesty | P0 | ⚪ TODO | 7 | 0.5 day |
+| 2 | Loopback and memory honesty | P0 | ✅ DONE | 7 | 0.5 day |
 | 3 | Cursor and VS Code Continue | P0 | ⚪ TODO | 8 | 1 day |
 | 4 | Serve/generate smoke | P1 | ⚪ TODO | 6 | 0.5 day |
 | 5 | Fix list-models / YAML | P1 | ⚪ TODO | 5 | 0.5 day |
@@ -113,7 +113,7 @@ Phase 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. Do not start N+1 until N exit
 
 ## Phase 2: Loopback and memory honesty (P0)
 
-**Status:** ⚪ TODO  
+**Status:** ✅ DONE  
 **Goal:** API is loopback-only; Docker memory limits match what Phase 1 will actually load; README matches compose.  
 **Prerequisites:** Phase 1 (quant RAM numbers exist)  
 **Estimated effort:** 0.5 day
@@ -140,19 +140,19 @@ Phase 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. Do not start N+1 until N exit
 
 ### 2.1 — Bind address
 
-- [ ] **2.1.1** Compose and docker-run fallback bind `127.0.0.1:11434:11434`
-- [ ] **2.1.2** systemd unit sets `OLLAMA_HOST=127.0.0.1:11434`
-- [ ] **2.1.3** README Architecture/port sentences match the files
+- [x] **2.1.1** Compose and docker-run fallback bind `127.0.0.1:11434:11434`
+- [x] **2.1.2** systemd unit sets `OLLAMA_HOST=127.0.0.1:11434`
+- [x] **2.1.3** README Architecture/port sentences match the files
 
 ### 2.2 — Memory vs quant
 
-- [ ] **2.2.1** If 7B Q4 remains in Docker catalog, `mem_limit` is ≥ catalog `memoryRequired` (no 4g vs 5–6g lie). Else Docker menu/gate blocks 7B (Phase 1 gate must agree)
-- [ ] **2.2.2** `memswap_limit` is not advertised as “performance”; README says swap = thrash
+- [x] **2.2.1** If 7B Q4 remains in Docker catalog, `mem_limit` is ≥ catalog `memoryRequired` (no 4g vs 5–6g lie). Else Docker menu/gate blocks 7B (Phase 1 gate must agree)
+- [x] **2.2.2** `memswap_limit` is not advertised as “performance”; README says swap = thrash
 
 ### 2.3 — Exit
 
-- [ ] **2.3.1** `docker compose config` shows host `127.0.0.1:11434`
-- [ ] **2.3.2** Mark Phase 2 complete; note if GPU is still unset (allowed)
+- [x] **2.3.1** `docker compose config` shows host `127.0.0.1:11434`
+- [x] **2.3.2** Mark Phase 2 complete; note if GPU is still unset (allowed)
 
 ---
 

@@ -170,7 +170,7 @@ No server management needed—everything is local Docker.
 - **Container**: Ollama (official Docker image)
 - **Models**: Multiple supported (Phi-2, Mistral, CodeLlama, Llama2, etc.)
 - **Storage**: Docker volume `ollama-models` (persists across restarts)
-- **Port**: 11434 (local only, not exposed to network)
+- **Port**: `127.0.0.1:11434` (loopback only; not published on LAN)
 - **API**: OpenAI-compatible REST API
 
 ## Available Models
@@ -200,11 +200,12 @@ Docker `mem_limit: 4g` will refuse 7B Q4 pulls (they need ~5.5–6 GB). Use nati
 
 The `docker-compose.yml` provides persistent configuration:
 - **Container name**: ollama-server
-- **Memory limit**: 4 GB (physical)
-- **Swap limit**: 10 GB total (6 GB swap)
-- **Port**: 11434 (localhost only)
+- **Memory limit**: 4 GB physical (`mem_limit: 4g`). 7B Q4 models are blocked; use native mode.
+- **Swap limit**: 10 GB total (`memswap_limit: 10g`). Swap is thrash, not a speed feature.
+- **Port**: `127.0.0.1:11434:11434` (loopback only)
 - **Restart policy**: always (auto-recovery)
 - **Volume**: ollama-models (model persistence)
+- **GPU**: unset (CPU inference unless you add a device mapping yourself)
 
 Start with compose:
 ```bash
@@ -230,10 +231,9 @@ memswap_limit: 10g
 ```
 
 **How it works:**
-- Initial allocation: 4 GB (sufficient for Phi-2)
-- Swap kicks in: Only when demand exceeds 4 GB
-- Physical memory protected: Never uses more than 10 GB total
-- Performance: Stays fast for most tasks
+- Container cap: 4 GB (enough for TinyLlama / Phi / Phi-3 Q4)
+- 7B Q4 needs ~5.5–6 GB — Docker setup refuses those pulls
+- `memswap_limit: 10g` is a safety ceiling; hitting swap means thrash, not faster inference
 
 ### Continue Extension Config
 

@@ -13,7 +13,7 @@ if ! docker ps --format '{{.Names}}' | grep -q '^ollama-server$'; then
       --memory=4g \
       --memory-swap=10g \
       -v ollama-models:/root/.ollama \
-      -p 11434:11434 \
+      -p 127.0.0.1:11434:11434 \
       ollama/ollama:latest
   }
   sleep 5
