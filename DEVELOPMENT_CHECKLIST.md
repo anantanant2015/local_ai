@@ -12,7 +12,7 @@ Flow diagrams (review Part A):
 - ![Auth surfaces](docs/images/auth-surfaces.png)
 - ![Inference path](docs/images/inference-path.png)
 
-Note: `docs/` is gitignored until Phase 7. PNGs live at `docs/images/` locally.
+Note: `docs/` tracks `requirement.txt`, this pointer file, and `docs/images/`. Agent-instruction leftovers stay gitignored.
 
 ## Suggested agent order
 
@@ -28,7 +28,7 @@ Phase 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. Do not start N+1 until N exit
 | 4 | Serve/generate smoke | P1 | ✅ DONE | 6 | 0.5 day |
 | 5 | Fix list-models / YAML | P1 | ✅ DONE | 5 | 0.5 day |
 | 6 | Stop daemon.json smash | P1 | ✅ DONE | 5 | 0.5 day |
-| 7 | Spec, docs track, honest CI | P2 | ⚪ TODO | 7 | 0.5 day |
+| 7 | Spec, docs track, honest CI | P2 | ✅ DONE | 7 | 0.5 day |
 | 8 | Collapse native/Docker dup | P2 | ⚪ TODO | 6 | 1.5 days |
 
 ## GLOBAL AGENT RULES
@@ -312,7 +312,7 @@ Phase 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. Do not start N+1 until N exit
 
 ## Phase 7: Spec, docs track, honest CI (P2)
 
-**Status:** ⚪ TODO  
+**Status:** ✅ DONE  
 **Goal:** Requirements and checklist can be git-tracked; CI does not print PASSED when jobs failed.  
 **Prerequisites:** none strictly; better after Phases 1–3 so spec matches code  
 **Estimated effort:** 0.5 day
@@ -335,19 +335,19 @@ Phase 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. Do not start N+1 until N exit
 
 ### 7.1 — Spec
 
-- [ ] **7.1.1** `docs/requirement.txt` filled from the two user goals (quantized local models; Continue in Cursor + VS Code)
-- [ ] **7.1.2** `.gitignore` allows `docs/requirement.txt`, `docs/DEVELOPMENT_CHECKLIST.md`, `docs/images/`
-- [ ] **7.1.3** Link review diagrams from checklist if those PNGs are kept
+- [x] **7.1.1** `docs/requirement.txt` filled from the two user goals (quantized local models; Continue in Cursor + VS Code)
+- [x] **7.1.2** `.gitignore` allows `docs/requirement.txt`, `docs/DEVELOPMENT_CHECKLIST.md`, `docs/images/`
+- [x] **7.1.3** Link review diagrams from checklist if those PNGs are kept
 
 ### 7.2 — CI honesty
 
-- [ ] **7.2.1** Summary job: exit 1 if any needed job failed
-- [ ] **7.2.2** Remove or fix “Ready for deployment” when only syntax was checked
+- [x] **7.2.1** Summary job: exit 1 if any needed job failed
+- [x] **7.2.2** Remove or fix “Ready for deployment” when only syntax was checked
 
 ### 7.3 — Exit
 
-- [ ] **7.3.1** Workflow YAML still valid; document that CI ≠ model smoke on GH runners
-- [ ] **7.3.2** Mark Phase 7 complete
+- [x] **7.3.1** Workflow YAML still valid; document that CI ≠ model smoke on GH runners
+- [x] **7.3.2** Mark Phase 7 complete
 
 ---
 
