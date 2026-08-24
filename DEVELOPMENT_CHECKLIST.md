@@ -24,7 +24,7 @@ Phase 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. Do not start N+1 until N exit
 |------:|------|----------|--------|------:|----------|
 | 1 | Quant catalog | P0 | ✅ DONE | 8 | 1 day |
 | 2 | Loopback and memory honesty | P0 | ✅ DONE | 7 | 0.5 day |
-| 3 | Cursor and VS Code Continue | P0 | ⚪ TODO | 8 | 1 day |
+| 3 | Cursor and VS Code Continue | P0 | ✅ DONE | 8 | 1 day |
 | 4 | Serve/generate smoke | P1 | ⚪ TODO | 6 | 0.5 day |
 | 5 | Fix list-models / YAML | P1 | ⚪ TODO | 5 | 0.5 day |
 | 6 | Stop daemon.json smash | P1 | ⚪ TODO | 5 | 0.5 day |
@@ -158,7 +158,7 @@ Phase 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. Do not start N+1 until N exit
 
 ## Phase 3: Cursor and VS Code Continue (P0)
 
-**Status:** ⚪ TODO  
+**Status:** ✅ DONE  
 **Goal:** After a model is healthy, Continue is configured for **both** VS Code and Cursor from the same YAML; chat default is the selected chat model.  
 **Prerequisites:** Phase 1 (tags); Phase 2 optional but preferred for bind honesty  
 **Estimated effort:** 1 day
@@ -184,21 +184,21 @@ Phase 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. Do not start N+1 until N exit
 
 ### 3.1 — YAML contract
 
-- [ ] **3.1.1** Chat model is first in `models:` so Continue default chat matches `--chat`
-- [ ] **3.1.2** Autocomplete still only via `tabAutocompleteModel` (do not drop it)
-- [ ] **3.1.3** Printed summary still lists included / chat / autocomplete tags
+- [x] **3.1.1** Chat model is first in `models:` so Continue default chat matches `--chat`
+- [x] **3.1.2** Autocomplete still only via `tabAutocompleteModel` (do not drop it)
+- [x] **3.1.3** Printed summary still lists included / chat / autocomplete tags
 
 ### 3.2 — Editor docs
 
-- [ ] **3.2.1** README: VS Code Continue install + reload + model picker
-- [ ] **3.2.2** README: Cursor → Extensions → Continue (same ID) → same `~/.continue/config.yaml`
-- [ ] **3.2.3** README: optional Cursor native Ollama base URL; state Continue is the supported path
-- [ ] **3.2.4** Setup/switch echo text matches README (Cursor + VS Code)
+- [x] **3.2.1** README: VS Code Continue install + reload + model picker
+- [x] **3.2.2** README: Cursor → Extensions → Continue (same ID) → same `~/.continue/config.yaml`
+- [x] **3.2.3** README: optional Cursor native Ollama base URL; state Continue is the supported path
+- [x] **3.2.4** Setup/switch echo text matches README (Cursor + VS Code)
 
 ### 3.3 — Exit
 
-- [ ] **3.3.1** Run generator against an installed tiny model (or fixture tags if offline) and confirm YAML order by reading the file
-- [ ] **3.3.2** Mark Phase 3 complete; honesty: no automated UI click-test of Continue in this phase (Phase 4 is API smoke)
+- [x] **3.3.1** Run generator against an installed tiny model (or fixture tags if offline) and confirm YAML order by reading the file
+- [x] **3.3.2** Mark Phase 3 complete; honesty: no automated UI click-test of Continue in this phase (Phase 4 is API smoke)
 
 ---
 

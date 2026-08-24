@@ -42,4 +42,4 @@ bash "$SCRIPT_DIR/generate_continue_config.sh" --mode native --models "$MODELS_C
 echo -e "\n${GREEN}✅ Configuration updated!${NC}"
 echo -e "${CYAN}Chat model: $CHAT_TAG${NC}"
 echo -e "${CYAN}Autocomplete model: $AUTO_TAG${NC}"
-echo -e "\n${YELLOW}Reload VS Code to apply changes${NC}"
+echo -e "\n${YELLOW}Reload VS Code or Cursor to apply changes${NC}"

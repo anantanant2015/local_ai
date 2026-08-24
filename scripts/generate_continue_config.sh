@@ -28,7 +28,7 @@ Options:
 Examples:
   $(basename "$0") --mode native
   $(basename "$0") --mode native --single qwen2.5-coder:3b
-  $(basename "$0") --mode docker --models phi3:mini,qwen2.5-coder:3b --chat phi3:mini --autocomplete qwen2.5-coder:3b
+  $(basename "$0") --mode docker --models phi3:3.8b-mini-4k-instruct-q4_K_M,qwen2.5-coder:3b-instruct-q4_K_M --chat phi3:3.8b-mini-4k-instruct-q4_K_M --autocomplete qwen2.5-coder:3b-instruct-q4_K_M
 EOF
 }
 
@@ -183,6 +183,15 @@ if ! contains_tag "$AUTO_MODEL" "${INCLUDED_MODELS[@]}"; then
   echo "❌ Autocomplete model '$AUTO_MODEL' must be present in included models." >&2
   exit 1
 fi
+
+# Continue uses the first models[] entry as the default chat model.
+declare -a ORDERED_MODELS
+ORDERED_MODELS=("$CHAT_MODEL")
+for tag in "${INCLUDED_MODELS[@]}"; do
+  [ "$tag" = "$CHAT_MODEL" ] && continue
+  ORDERED_MODELS+=("$tag")
+done
+INCLUDED_MODELS=("${ORDERED_MODELS[@]}")
 
 mkdir -p "$(dirname "$OUTPUT_FILE")"
 [ -f "$OUTPUT_FILE" ] && cp "$OUTPUT_FILE" "$OUTPUT_FILE.backup"

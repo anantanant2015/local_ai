@@ -27,4 +27,4 @@ else
   sleep 5
 fi
 
-echo "📝 In VS Code: install 'Continue' and use Phi-2 Local model"
+echo "📝 In VS Code or Cursor: install Continue (Continue.continue) and reload"

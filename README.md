@@ -103,22 +103,28 @@ curl http://localhost:11434
 
 Expected response: HTTP header with version info.
 
-## Configure Continue in VS Code
+## Configure Continue in VS Code and Cursor
 
-The setup script automatically configures Continue. To verify or manually set it up:
+Setup writes `~/.continue/config.yaml` (Ollama provider, `apiBase: http://127.0.0.1:11434`). The **first** model in `models:` is the default chat model. `continue_config.json` in this repo is legacy and unused.
 
-1. **Install Continue extension** in VS Code Marketplace
-2. **Config location**: `~/.continue/config.yaml` (created automatically)
-3. **Available models** in Continue:
-   - **Phi-2 Local** — Fast autocomplete (default)
-   - **Mistral Local** — Better reasoning & code generation
-4. **Select Phi-2 Local** from Continue model dropdown:
-   - Open Continue panel (left sidebar or `Ctrl+L`)
-   - Click model selector at bottom
-   - Choose "Phi-2 Local"
-5. **Reload VS Code** if config doesn't load
+**Supported path: Continue extension** (`Continue.continue`) in both editors.
 
-The extension will connect to `http://localhost:11434` automatically.
+### VS Code
+
+1. Install **Continue** from the VS Code Marketplace (`Continue.continue`)
+2. Config: `~/.continue/config.yaml` (created by `make setup` / `make setup-native` / switch)
+3. Open Continue (`Ctrl+L` / `Cmd+L`), pick the chat model from the dropdown
+4. Reload the window if the config does not load
+
+### Cursor
+
+1. Extensions → install **Continue** (`Continue.continue`) — same YAML as VS Code
+2. Reload Cursor
+3. Open Continue and pick the local Ollama model
+
+**Optional (not the supported path):** Cursor Settings → Models → add Ollama at `http://127.0.0.1:11434`. Prefer Continue so chat and tab-complete stay in one config.
+
+The extension talks to `http://127.0.0.1:11434`.
 
 ## Usage Commands
 
@@ -273,10 +279,7 @@ curl -sS http://127.0.0.1:11434/api/generate \
 
 ## Configuration
 
-The [continue_config.json](continue_config.json) is automatically managed by setup/switch commands. Manual editing is supported for:
-- Advanced model parameters
-- Custom slash commands
-- API configuration
+The [continue_config.json](continue_config.json) is unused legacy JSON. Live config is `~/.continue/config.yaml`.
 
 ## Troubleshooting
 

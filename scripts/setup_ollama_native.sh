@@ -106,5 +106,6 @@ done
 bash "$SCRIPT_DIR/generate_continue_config.sh" --mode native --models "$MODELS_CSV" --chat "$CHAT_MODEL" --autocomplete "$AUTOCOMPLETE_MODEL"
 
 echo -e "\n${GREEN}✅ Native setup complete!${NC}"
+echo -e "${CYAN}Install Continue (Continue.continue) in VS Code and/or Cursor, then reload.${NC}"
 echo -e "${CYAN}Start: bash scripts/start_ollama_native.sh${NC}"
 echo -e "${CYAN}Stop:  bash scripts/stop_ollama_native.sh${NC}"
